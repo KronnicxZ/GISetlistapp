@@ -20,19 +20,20 @@ export default function LoginModal({ isOpen, onClose }) {
         throw new Error('Solo el administrador puede iniciar sesión');
       }
 
-      const { data, error } = isRegistering
-        ? await auth.signUp({
-            email,
-            password,
-          })
-        : await auth.signIn(email, password);
+      let result;
+      if (isRegistering) {
+        result = await auth.signUp(email, password);
+      } else {
+        result = await auth.signIn(email, password);
+      }
 
-      if (error) throw error;
+      if (result.error) throw result.error;
 
-      if (data) {
+      if (result.data) {
         onClose();
       }
     } catch (error) {
+      console.error('Error:', error);
       setError(error.message);
     } finally {
       setLoading(false);
