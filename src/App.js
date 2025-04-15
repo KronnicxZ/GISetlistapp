@@ -76,20 +76,40 @@ function App() {
 
   const handleSaveSong = async (songData) => {
     try {
-      let response;
-      if (editingSong) {
-        response = await songsApi.update(editingSong.id, songData);
-      } else {
-        response = await songsApi.create(songData);
+      // Asegurarse de que los campos requeridos estén presentes
+      if (!songData.title) {
+        throw new Error('El título es requerido');
       }
 
-      if (response.error) throw response.error;
+      // Formatear los datos antes de enviarlos
+      const formattedSong = {
+        title: songData.title,
+        artist: songData.artist || '',
+        bpm: songData.bpm ? parseInt(songData.bpm) : null,
+        key: songData.key || '',
+        genre: songData.genre || '',
+        youtubeUrl: songData.youtubeUrl || '',
+        lyrics: songData.lyrics || ''
+      };
+
+      let response;
+      if (editingSong) {
+        response = await songsApi.update(editingSong.id, formattedSong);
+      } else {
+        response = await songsApi.create(formattedSong);
+      }
+
+      if (response.error) {
+        console.error('Error de Supabase:', response.error);
+        throw response.error;
+      }
 
       await loadData();
       setShowSongForm(false);
       setEditingSong(null);
     } catch (error) {
       console.error('Error al guardar canción:', error);
+      alert(error.message);
     }
   };
 
