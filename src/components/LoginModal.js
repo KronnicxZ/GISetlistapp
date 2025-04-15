@@ -1,69 +1,104 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { supabase } from '../supabaseClient';
 
-const LoginModal = ({ onClose }) => {
+const ADMIN_EMAIL = 'admin@gisetlist.com';
+
+export default function LoginModal({ isOpen, onClose }) {
+  const [email, setEmail] = useState(ADMIN_EMAIL);
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isRegistering, setIsRegistering] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (login(password)) {
-      onClose();
-    } else {
-      setError('Contraseña incorrecta');
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (email !== ADMIN_EMAIL) {
+        throw new Error('Solo el administrador puede iniciar sesión');
+      }
+
+      const { data, error } = isRegistering
+        ? await supabase.auth.signUp({
+            email,
+            password,
+          })
+        : await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+      if (error) throw error;
+
+      if (data) {
+        onClose();
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div 
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <div className="bg-[#0f1420] w-full max-w-md rounded-lg overflow-hidden p-4 md:p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-white">Acceso Administrador</h2>
-          <button 
-            onClick={onClose}
-            className="text-gray-400 hover:text-white p-2"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-          </button>
-        </div>
+  if (!isOpen) return null;
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-[#1a1f2e] rounded-lg p-8 max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-6 text-[#FBAE00]">
+          {isRegistering ? 'Registro' : 'Iniciar Sesión'}
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              disabled
+              className="w-full p-2 rounded bg-[#0f1420] text-white border border-gray-700"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Contraseña
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00]"
-              placeholder="Ingresa la contraseña"
+              className="w-full p-2 rounded bg-[#0f1420] text-white border border-gray-700"
+              required
             />
-            {error && (
-              <p className="mt-2 text-sm text-red-500">{error}</p>
-            )}
           </div>
-
-          <button
-            type="submit"
-            className="w-full px-4 py-2.5 text-sm font-medium text-black bg-[#FBAE00] rounded-lg hover:bg-[#ffc03d] focus:outline-none"
-          >
-            Iniciar sesión
-          </button>
+          {error && (
+            <p className="text-red-500 text-sm mt-2">{error}</p>
+          )}
+          <div className="flex justify-end space-x-4 mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-[#FBAE00] text-black rounded hover:bg-[#ffc03d] disabled:opacity-50"
+            >
+              {loading
+                ? 'Cargando...'
+                : isRegistering
+                ? 'Registrarse'
+                : 'Iniciar Sesión'}
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
-};
-
-export default LoginModal; 
+} 

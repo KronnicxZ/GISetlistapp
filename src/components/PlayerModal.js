@@ -103,7 +103,7 @@ const PlayerModal = ({ song, onClose }) => {
                 Letra con acordes
               </h4>
               <div className="p-4 overflow-y-auto flex-1">
-                <pre className="whitespace-pre-wrap font-sans text-gray-300">
+                <pre className="whitespace-pre-wrap lyrics-text text-gray-300">
                   {transposedLyrics}
                 </pre>
               </div>

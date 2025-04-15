@@ -208,7 +208,7 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                 value={formData.lyrics || ''}
                 onChange={handleChange}
                 rows="6"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00]"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text"
                 placeholder="[Am] Letra de la canción..."
               />
             </div>
