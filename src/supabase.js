@@ -99,61 +99,155 @@ export const songs = {
 
 export const setlists = {
   getAll: async () => {
-    const { data, error } = await supabase
-      .from('setlists')
-      .select('*')
-      .order('date', { ascending: false })
-    return { data, error }
+    try {
+      console.log('Obteniendo todos los setlists...');
+      const { data, error } = await supabase
+        .from('setlists')
+        .select('*')
+        .order('date', { ascending: false });
+      
+      if (error) {
+        console.error('Error al obtener setlists:', error);
+      } else {
+        console.log('Setlists obtenidos:', data);
+      }
+      return { data, error };
+    } catch (err) {
+      console.error('Error inesperado al obtener setlists:', err);
+      return { data: null, error: err };
+    }
   },
 
   create: async (setlist) => {
-    const { data, error } = await supabase
-      .from('setlists')
-      .insert([setlist])
-      .select()
-    return { data, error }
+    try {
+      console.log('Datos recibidos para crear setlist:', setlist);
+      
+      // Preparar los datos para inserción
+      const setlistData = {
+        name: setlist.name,
+        date: setlist.date,
+        description: setlist.description || null
+      };
+      
+      console.log('Datos preparados para inserción:', setlistData);
+      
+      const { data, error } = await supabase
+        .from('setlists')
+        .insert([setlistData])
+        .select();
+      
+      if (error) {
+        console.error('Error al crear setlist:', error);
+        return { data: null, error };
+      }
+      
+      console.log('Setlist creado exitosamente:', data);
+      
+      // Si hay canciones seleccionadas, agregarlas al setlist
+      if (setlist.songs && setlist.songs.length > 0 && data && data[0]) {
+        console.log('Agregando canciones al setlist:', setlist.songs);
+        const { error: songsError } = await setlists.addSongs(data[0].id, setlist.songs);
+        if (songsError) {
+          console.error('Error al agregar canciones al setlist:', songsError);
+          return { data, error: songsError };
+        }
+      }
+      
+      return { data, error: null };
+    } catch (err) {
+      console.error('Error inesperado al crear setlist:', err);
+      return { data: null, error: err };
+    }
   },
 
   update: async (id, updates) => {
-    const { data, error } = await supabase
-      .from('setlists')
-      .update(updates)
-      .eq('id', id)
-      .select()
-    return { data, error }
+    try {
+      console.log('Actualizando setlist:', id, updates);
+      const { data, error } = await supabase
+        .from('setlists')
+        .update(updates)
+        .eq('id', id)
+        .select();
+      
+      if (error) {
+        console.error('Error al actualizar setlist:', error);
+      } else {
+        console.log('Setlist actualizado exitosamente:', data);
+      }
+      return { data, error };
+    } catch (err) {
+      console.error('Error inesperado al actualizar setlist:', err);
+      return { data: null, error: err };
+    }
   },
 
   delete: async (id) => {
-    const { error } = await supabase
-      .from('setlists')
-      .delete()
-      .eq('id', id)
-    return { error }
+    try {
+      console.log('Eliminando setlist:', id);
+      const { error } = await supabase
+        .from('setlists')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error al eliminar setlist:', error);
+      } else {
+        console.log('Setlist eliminado exitosamente');
+      }
+      return { error };
+    } catch (err) {
+      console.error('Error inesperado al eliminar setlist:', err);
+      return { error: err };
+    }
   },
 
   addSongs: async (setlistId, songIds) => {
-    const entries = songIds.map((songId, index) => ({
-      setlist_id: setlistId,
-      song_id: songId,
-      order_number: index + 1
-    }))
+    try {
+      console.log('Agregando canciones al setlist:', setlistId, songIds);
+      const entries = songIds.map((songId, index) => ({
+        setlist_id: setlistId,
+        song_id: songId,
+        order_number: index + 1
+      }));
 
-    const { data, error } = await supabase
-      .from('setlist_songs')
-      .insert(entries)
-      .select()
-    return { data, error }
+      const { data, error } = await supabase
+        .from('setlist_songs')
+        .insert(entries)
+        .select();
+      
+      if (error) {
+        console.error('Error al agregar canciones al setlist:', error);
+      } else {
+        console.log('Canciones agregadas exitosamente:', data);
+      }
+      return { data, error };
+    } catch (err) {
+      console.error('Error inesperado al agregar canciones:', err);
+      return { data: null, error: err };
+    }
   },
 
   getSongs: async (setlistId) => {
-    const { data, error } = await supabase
-      .from('setlist_songs')
-      .select(`
-        order_number,
-        songs (*)
-      `)
-      .eq('setlist_id', setlistId)
-      .order('order_number')
-    return { data, error }
+    try {
+      console.log('Obteniendo canciones del setlist:', setlistId);
+      const { data, error } = await supabase
+        .from('setlist_songs')
+        .select(`
+          order_number,
+          songs (*)
+        `)
+        .eq('setlist_id', setlistId)
+        .order('order_number');
+      
+      if (error) {
+        console.error('Error al obtener canciones del setlist:', error);
+      } else {
+        console.log('Canciones del setlist obtenidas:', data);
+      }
+      return { data, error };
+    } catch (err) {
+      console.error('Error inesperado al obtener canciones:', err);
+      return { data: null, error: err };
+    }
   }
 } 

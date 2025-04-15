@@ -10,11 +10,21 @@ const SetlistForm = ({ songs, initialData, onSubmit, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    console.log('Enviando datos del setlist:', formData);
+    
+    // Convertir la fecha a formato ISO con zona horaria
+    const formattedData = {
+      ...formData,
+      date: new Date(formData.date).toISOString(),
+    };
+    
+    console.log('Datos formateados:', formattedData);
+    onSubmit(formattedData);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log('Campo modificado:', name, value);
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
