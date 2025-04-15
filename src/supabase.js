@@ -3,6 +3,13 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
 
+console.log('Supabase URL:', supabaseUrl)
+console.log('Supabase Key exists:', !!supabaseAnonKey)
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Error: Faltan las variables de entorno de Supabase')
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Funciones auxiliares para interactuar con Supabase
@@ -36,19 +43,40 @@ export const auth = {
 
 export const songs = {
   getAll: async () => {
-    const { data, error } = await supabase
-      .from('songs')
-      .select('*')
-      .order('created_at', { ascending: false })
-    return { data, error }
+    try {
+      const { data, error } = await supabase
+        .from('songs')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (error) {
+        console.error('Error al obtener canciones:', error)
+      }
+      return { data, error }
+    } catch (err) {
+      console.error('Error inesperado al obtener canciones:', err)
+      return { data: null, error: err }
+    }
   },
 
   create: async (song) => {
-    const { data, error } = await supabase
-      .from('songs')
-      .insert([song])
-      .select()
-    return { data, error }
+    try {
+      console.log('Intentando crear canción:', song)
+      const { data, error } = await supabase
+        .from('songs')
+        .insert([song])
+        .select()
+      
+      if (error) {
+        console.error('Error al crear canción:', error)
+      } else {
+        console.log('Canción creada exitosamente:', data)
+      }
+      return { data, error }
+    } catch (err) {
+      console.error('Error inesperado al crear canción:', err)
+      return { data: null, error: err }
+    }
   },
 
   update: async (id, updates) => {
