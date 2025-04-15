@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../supabaseClient';
+import { auth } from '../supabase';
 
 const ADMIN_EMAIL = 'admin@gisetlist.com';
 
@@ -21,11 +21,11 @@ export default function LoginModal({ isOpen, onClose }) {
       }
 
       const { data, error } = isRegistering
-        ? await supabase.auth.signUp({
+        ? await auth.signUp({
             email,
             password,
           })
-        : await supabase.auth.signInWithPassword({
+        : await auth.signInWithPassword({
             email,
             password,
           });
