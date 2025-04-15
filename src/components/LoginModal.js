@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { auth } from '../supabase';
 
-const ADMIN_EMAIL = 'admin@gisetlist.com';
+const ADMIN_EMAIL = 'kronnicxz@gmail.com';
 
 export default function LoginModal({ isOpen, onClose }) {
   const [email, setEmail] = useState(ADMIN_EMAIL);
