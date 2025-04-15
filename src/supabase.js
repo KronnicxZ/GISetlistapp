@@ -101,17 +101,34 @@ export const setlists = {
   getAll: async () => {
     try {
       console.log('Obteniendo todos los setlists...');
-      const { data, error } = await supabase
+      // Primero obtenemos los setlists
+      const { data: setlistsData, error: setlistsError } = await supabase
         .from('setlists')
         .select('*')
         .order('date', { ascending: false });
       
-      if (error) {
-        console.error('Error al obtener setlists:', error);
-      } else {
-        console.log('Setlists obtenidos:', data);
+      if (setlistsError) {
+        console.error('Error al obtener setlists:', setlistsError);
+        return { data: null, error: setlistsError };
       }
-      return { data, error };
+
+      // Para cada setlist, obtenemos sus canciones
+      const setlistsWithSongs = await Promise.all(
+        setlistsData.map(async (setlist) => {
+          const { data: songsData } = await supabase
+            .from('setlist_songs')
+            .select('songs (*)')
+            .eq('setlist_id', setlist.id);
+
+          return {
+            ...setlist,
+            songs: songsData?.map(item => item.songs.id) || []
+          };
+        })
+      );
+
+      console.log('Setlists con canciones:', setlistsWithSongs);
+      return { data: setlistsWithSongs, error: null };
     } catch (err) {
       console.error('Error inesperado al obtener setlists:', err);
       return { data: null, error: err };
@@ -236,7 +253,15 @@ export const setlists = {
         .select(`
           id,
           order_number,
-          songs (*)
+          songs (
+            id,
+            title,
+            artist,
+            bpm,
+            key,
+            genre,
+            youtubeUrl
+          )
         `);
 
       if (error) {
