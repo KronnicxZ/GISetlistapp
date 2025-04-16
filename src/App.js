@@ -33,6 +33,21 @@ function App() {
     loadData();
   }, []);
 
+  // Efecto para cerrar el sidebar al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Si el menú está abierto y el clic no fue dentro del sidebar ni en el botón de menú
+      if (showMobileMenu && 
+          !event.target.closest('.sidebar') && 
+          !event.target.closest('.mobile-menu-button')) {
+        setShowMobileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMobileMenu]);
+
   const checkUser = async () => {
     try {
       const { session } = await auth.getSession();
@@ -352,7 +367,7 @@ function App() {
           <div className="flex items-center justify-between">
             <button
               onClick={() => setShowMobileMenu(true)}
-              className="p-2 -ml-2 text-gray-400 hover:text-white"
+              className="mobile-menu-button p-2 -ml-2 text-gray-400 hover:text-white"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
