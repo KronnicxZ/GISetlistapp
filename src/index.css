@@ -23,9 +23,18 @@ body {
   tab-size: 4;
 }
 
-.lyrics-text [data-chord] {
-  color: #FBAE00;
+/* Estilo para acordes */
+.lyrics-text [data-chord="true"] {
+  color: #4a9eff;
   font-weight: 500;
+}
+
+/* Estilo para etiquetas de sección */
+.lyrics-text [data-section="true"] {
+  color: #FBAE00;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 0.5em;
 }
 
 /* Estilos para scrollbars personalizados */
