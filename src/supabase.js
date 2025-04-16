@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import { supabase } from './supabaseClient'
+import { extractYoutubeVideoId, getVideoDuration } from './utils/youtube'
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
@@ -84,6 +86,20 @@ export const songs = {
   create: async (song) => {
     try {
       console.log('Intentando crear canción:', song)
+      
+      // Si hay una URL de YouTube, obtener la duración
+      let duration = null;
+      if (song.youtubeUrl) {
+        console.log('Obteniendo duración para:', song.youtubeUrl);
+        const videoId = extractYoutubeVideoId(song.youtubeUrl);
+        if (videoId) {
+          console.log('ID del video:', videoId);
+          duration = await getVideoDuration(videoId);
+          console.log('Duración obtenida:', duration);
+          song.duration = duration;
+        }
+      }
+
       const { data, error } = await supabase
         .from('songs')
         .insert([song])
