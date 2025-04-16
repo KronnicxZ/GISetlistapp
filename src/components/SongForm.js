@@ -41,17 +41,39 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     
     // Procesar cada línea
     const formattedLines = lines.map(line => {
-      // Buscar acordes en la línea
-      const words = line.split(/\s+/);
-      const formattedWords = words.map(word => {
-        // Verificar si la palabra es un acorde
-        const isChord = commonChords.some(chord => 
-          word.toUpperCase() === chord.toUpperCase() ||
-          word.toUpperCase().startsWith(chord.toUpperCase() + '/')
+      // Si la línea está vacía, devolverla tal cual
+      if (!line.trim()) return line;
+
+      // Verificar si la línea contiene solo acordes (sin texto)
+      const words = line.trim().split(/\s+/);
+      const isChordOnlyLine = words.every(word => {
+        const trimmedWord = word.trim();
+        return commonChords.some(chord => 
+          trimmedWord.toUpperCase() === chord.toUpperCase() ||
+          trimmedWord.toUpperCase().startsWith(chord.toUpperCase() + '/')
         );
-        
-        // Si es un acorde, añadir corchetes
-        if (isChord) {
+      });
+
+      if (isChordOnlyLine && words.length > 0) {
+        // Si es una línea solo de acordes, formatear cada palabra como acorde
+        return words.map(word => `[${word}]`).join(' ');
+      }
+
+      // Para líneas con texto, solo formatear palabras que son definitivamente acordes
+      // (están solas o al principio de la línea)
+      const formattedWords = words.map((word, index) => {
+        const trimmedWord = word.trim();
+        const isFirstWord = index === 0;
+        const isPreviousWordEmpty = index > 0 && !words[index - 1].trim();
+        const isAlone = isFirstWord || isPreviousWordEmpty;
+
+        // Solo formatear como acorde si:
+        // 1. Es una palabra sola al principio de la línea o después de espacios
+        // 2. Coincide exactamente con un acorde conocido
+        if (isAlone && commonChords.some(chord => 
+          trimmedWord.toUpperCase() === chord.toUpperCase() ||
+          trimmedWord.toUpperCase().startsWith(chord.toUpperCase() + '/')
+        )) {
           return `[${word}]`;
         }
         return word;
