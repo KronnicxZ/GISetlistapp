@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { extractYoutubeVideoId, getVideoDuration } from '../utils/youtube';
 
 const SongForm = ({ initialData, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState(initialData || {
@@ -8,7 +9,8 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     key: '',
     genre: '',
     youtubeUrl: '',
-    lyrics: ''
+    lyrics: '',
+    duration: '-'
   });
   const [isFetching, setIsFetching] = useState(false);
   const [fetchError, setFetchError] = useState(null);
@@ -30,12 +32,13 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
       setIsFetching(true);
       setFetchError(null);
       
-      const videoId = formData.youtubeUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1];
+      const videoId = extractYoutubeVideoId(formData.youtubeUrl);
       
       if (!videoId) {
         throw new Error('URL de YouTube no válida');
       }
       
+      // Obtener título y artista
       const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
       
       if (!response.ok) {
@@ -56,14 +59,20 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
       } else if (titleParts.length === 1) {
         songTitle = titleParts[0];
       }
+
+      // Obtener duración del video
+      const duration = await getVideoDuration(videoId);
+      console.log('Duración obtenida:', duration);
       
       setFormData(prev => ({
         ...prev,
         title: songTitle,
-        artist: artist
+        artist: artist,
+        duration: duration || '-'
       }));
       
     } catch (error) {
+      console.error('Error al obtener datos del video:', error);
       setFetchError(error.message);
     } finally {
       setIsFetching(false);
