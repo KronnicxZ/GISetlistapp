@@ -24,9 +24,7 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     const { name } = e.target;
     if (name === 'lyrics') {
       const value = e.target.innerHTML;
-      // Formatear el texto mientras se escribe
-      const formattedText = formatPastedLyrics(value);
-      setFormData(prev => ({ ...prev, lyrics: formattedText }));
+      setFormData(prev => ({ ...prev, lyrics: value }));
     } else {
       const value = e.target.value;
       setFormData(prev => ({ ...prev, [name]: value }));
@@ -34,128 +32,95 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
   };
 
   const cleanText = (text) => {
-    // Eliminar todos los estilos HTML y mantener solo el texto plano
+    // Eliminar estilos HTML pero mantener los spans de acordes y secciones
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = text;
-    return tempDiv.textContent || tempDiv.innerText || '';
+    
+    // Mantener los spans de acordes y secciones
+    const spans = tempDiv.querySelectorAll('span');
+    spans.forEach(span => {
+      if (span.className === 'chord' || span.className === 'section') {
+        return;
+      }
+      const text = span.textContent;
+      span.parentNode.replaceChild(document.createTextNode(text), span);
+    });
+    
+    return tempDiv.innerHTML;
   };
 
   const formatPastedLyrics = (text) => {
-    // Primero limpiar cualquier formato HTML
-    const cleanedText = cleanText(text);
-
-    // Lista de acordes comunes
-    const commonChords = [
-      'A', 'Am', 'A7', 'Am7', 'Amaj7', 'A/C#', 'A/E', 'A/G#',
-      'B', 'Bm', 'B7', 'Bm7', 'Bmaj7', 'B/D#', 'B/F#',
-      'C', 'Cm', 'C7', 'Cm7', 'Cmaj7', 'C/E', 'C/G',
-      'D', 'Dm', 'D7', 'Dm7', 'Dmaj7', 'D/F#', 'D/A',
-      'E', 'Em', 'E7', 'Em7', 'Emaj7', 'E/G#', 'E/B',
-      'F', 'Fm', 'F7', 'Fm7', 'Fmaj7', 'F/A', 'F/C',
-      'G', 'Gm', 'G7', 'Gm7', 'Gmaj7', 'G/B', 'G/D',
-      // Variaciones con sostenidos y bemoles
-      'A#', 'A#m', 'A#7', 'A#m7', 'A#maj7',
-      'Bb', 'Bbm', 'Bb7', 'Bbm7', 'Bbmaj7',
-      'C#', 'C#m', 'C#7', 'C#m7', 'C#maj7',
-      'Db', 'Dbm', 'Db7', 'Dbm7', 'Dbmaj7',
-      'D#', 'D#m', 'D#7', 'D#m7', 'D#maj7',
-      'Eb', 'Ebm', 'Eb7', 'Ebm7', 'Ebmaj7',
-      'F#', 'F#m', 'F#7', 'F#m7', 'F#maj7',
-      'Gb', 'Gbm', 'Gb7', 'Gbm7', 'Gbmaj7',
-      'G#', 'G#m', 'G#7', 'G#m7', 'G#maj7',
-      'Ab', 'Abm', 'Ab7', 'Abm7', 'Abmaj7'
-    ];
-
-    // Lista de secciones
-    const sections = [
-      'Intro', 'Verso', 'Pre-Coro', 'Coro', 'Puente', 'Instrumental', 'Final',
-      'Outro', 'Interludio', 'Solo'
-    ];
-
     // Dividir el texto en líneas
-    const lines = cleanedText.split('\n');
+    const lines = text.split('\n');
     
     // Procesar cada línea
     const formattedLines = lines.map(line => {
-      // Si la línea está vacía, devolverla tal cual
-      if (!line.trim()) return line;
+      const trimmedLine = line.trim();
+      if (!trimmedLine) return '';
 
-      // Verificar si es una línea de sección
-      const sectionMatch = line.trim().match(/^\[(.*?)\]$/);
-      if (sectionMatch) {
-        const sectionContent = sectionMatch[1];
-        if (sections.some(section => 
-          sectionContent.toLowerCase().includes(section.toLowerCase())
-        )) {
-          return `<span class="section">[${sectionContent}]</span>`;
-        }
+      // Detectar secciones (INTRO, VERSO, etc.)
+      const sectionPattern = /^(INTRO|VERSO|PRE-?CORO|CORO|PUENTE|INSTRUMENTAL|FINAL)$/i;
+      if (sectionPattern.test(trimmedLine.replace(/[\[\]]/g, ''))) {
+        const sectionName = trimmedLine.replace(/[\[\]]/g, '').toUpperCase();
+        return `[${sectionName}]`;
       }
 
-      // Buscar acordes en la línea
-      const words = line.trim().split(/\s+/);
-      const formattedWords = words.map((word, index) => {
+      // Dividir la línea en palabras manteniendo espacios
+      const words = trimmedLine.split(/(\s+)/);
+      
+      // Procesar cada palabra
+      const processedWords = words.map(word => {
         const trimmedWord = word.trim();
-        // Verificar si la palabra está entre corchetes
-        const chordMatch = trimmedWord.match(/^\[(.*?)\]$/);
-        if (chordMatch) {
-          const chordContent = chordMatch[1];
-          // Verificar si el contenido es un acorde conocido
-          if (commonChords.some(chord => 
-            chordContent.toUpperCase() === chord.toUpperCase() ||
-            (chordContent.includes('/') && 
-             commonChords.some(c => chordContent.toUpperCase().startsWith(c.toUpperCase() + '/')))
-          )) {
-            return `<span class="chord">[${chordContent}]</span>`;
-          }
-        } else if (commonChords.some(chord => 
-          trimmedWord.toUpperCase() === chord.toUpperCase() ||
-          (trimmedWord.includes('/') && 
-           commonChords.some(c => trimmedWord.toUpperCase().startsWith(c.toUpperCase() + '/')))
-        ) && (index === 0 || words[index - 1] === '')) {
-          // Si es un acorde sin corchetes, agregárselos
-          return `<span class="chord">[${word}]</span>`;
+        if (!trimmedWord) return word; // Mantener espacios originales
+
+        // Detectar acordes (incluyendo variaciones comunes)
+        const chordPattern = /^[A-G](#|b)?m?(aj)?[0-9]?$/;
+        if (chordPattern.test(trimmedWord.replace(/[\[\]]/g, ''))) {
+          const chord = trimmedWord.replace(/[\[\]]/g, '');
+          return `[${chord}]`;
         }
         return word;
       });
-      
-      return formattedWords.join(' ');
+
+      return processedWords.join('');
     });
-    
+
     return formattedLines.join('\n');
   };
 
   const handlePaste = (e) => {
-    if (e.target.getAttribute('name') === 'lyrics') {
-      e.preventDefault();
-      const pastedText = e.clipboardData.getData('text');
-      const formattedText = formatPastedLyrics(pastedText);
-      
-      // Insertar el texto formateado en la posición del cursor
-      const selection = window.getSelection();
-      const range = selection.getRangeAt(0);
-      range.deleteContents();
-      
-      // Crear un elemento temporal para insertar el HTML
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = formattedText;
-      
-      // Insertar cada nodo del contenido formateado
-      while (tempDiv.firstChild) {
-        range.insertNode(tempDiv.firstChild);
-      }
-      
-      // Mover el cursor al final del texto insertado
-      range.collapse(false);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      
-      // Actualizar el estado
-      const editor = document.getElementById('lyrics');
-      setFormData(prev => ({
-        ...prev,
-        lyrics: editor.innerHTML
-      }));
-    }
+    e.preventDefault();
+    const clipboardText = e.clipboardData.getData('text');
+    const formattedText = formatPastedLyrics(clipboardText);
+    
+    // Insertar el texto formateado en la posición del cursor
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    
+    const textNode = document.createTextNode(formattedText);
+    range.insertNode(textNode);
+    
+    // Mover el cursor al final del texto insertado
+    range.setStartAfter(textNode);
+    range.setEndAfter(textNode);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
+    // Actualizar el estado
+    const editor = document.getElementById('lyrics');
+    setFormData(prev => ({
+      ...prev,
+      lyrics: editor.innerText
+    }));
+  };
+
+  const handleLyricsChange = (e) => {
+    const editor = document.getElementById('lyrics');
+    setFormData(prev => ({
+      ...prev,
+      lyrics: editor.innerText
+    }));
   };
 
   const fetchVideoData = async () => {
@@ -432,11 +397,12 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                 id="lyrics"
                 name="lyrics"
                 contentEditable
-                onInput={handleChange}
+                onInput={handleLyricsChange}
                 onPaste={handlePaste}
-                className="w-full min-h-[150px] px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text"
-                dangerouslySetInnerHTML={{ __html: formData.lyrics || '' }}
-              />
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text whitespace-pre-wrap"
+              >
+                {formData.lyrics}
+              </div>
             </div>
           </div>
 

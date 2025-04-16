@@ -36,6 +36,20 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
   const newKey = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][newKeyIndex] + 
     (song.key?.includes('m') ? 'm' : '');
 
+  const formatDisplayText = (text) => {
+    if (!text) return '';
+    
+    return text.split('\n').map((line, i) => {
+      // Procesar secciones
+      if (line.match(/^\[(INTRO|VERSO|PRE-?CORO|CORO|PUENTE|INSTRUMENTAL|FINAL)\]$/i)) {
+        return `<span class="section">${line}</span>`;
+      }
+      
+      // Procesar acordes
+      return line.replace(/\[([A-G][#b]?m?(aj)?[0-9]?)\]/g, '<span class="chord">[$1]</span>');
+    }).join('\n');
+  };
+
   return (
     <div 
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
@@ -146,9 +160,12 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
               <div className="bg-[#1a1f2e] h-full rounded-lg">
                 <div className="p-4">
                   <h3 className="text-gray-400 text-sm font-medium mb-4">Letra con acordes</h3>
-                  <pre className="text-white font-mono text-sm whitespace-pre-wrap lyrics-text">
-                    {transposedLyrics || '-'}
-                  </pre>
+                  <pre 
+                    className="text-white font-mono text-sm whitespace-pre-wrap lyrics-text"
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatDisplayText(transposedLyrics || '-') 
+                    }}
+                  />
                 </div>
               </div>
             </div>
