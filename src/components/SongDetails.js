@@ -139,7 +139,7 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
               </div>
 
               {/* Duplicate Button */}
-              {isAdmin && semitones !== 0 && onDuplicateSong && (
+              {isAdmin && semitones !== 0 && (
                 <button
                   onClick={handleDuplicateWithNewKey}
                   className="w-full bg-[#1a1f2e] hover:bg-[#242937] text-[#FBAE00] p-4 rounded-lg flex items-center justify-center space-x-2"

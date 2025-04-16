@@ -458,6 +458,7 @@ function App() {
         <SongDetails
           song={selectedSong}
           onClose={() => setSelectedSong(null)}
+          onDuplicateSong={handleSaveSong}
           isAdmin={!!user}
         />
       )}
