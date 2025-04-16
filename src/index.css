@@ -26,6 +26,7 @@ body {
 .chord {
   color: #4a9eff !important;
   font-weight: 500 !important;
+  display: inline-block;
 }
 
 .lyrics-text .section,
@@ -33,7 +34,8 @@ body {
   color: #FBAE00 !important;
   font-weight: 600 !important;
   display: inline-block;
-  margin-top: 0.5em;
+  margin-top: 0.75em;
+  margin-bottom: 0.25em;
 }
 
 /* Scrollbar styles */

@@ -88,34 +88,66 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     return formattedLines.join('\n');
   };
 
+  const formatDisplayText = (text) => {
+    if (!text) return '';
+    
+    return text.split('\n').map((line, i) => {
+      // Procesar secciones
+      if (line.match(/^\[(INTRO|VERSO|PRE-?CORO|CORO|PUENTE|INSTRUMENTAL|FINAL)\]$/i)) {
+        return `<span class="section">${line}</span>`;
+      }
+      
+      // Procesar acordes
+      return line.replace(/\[([A-G][#b]?m?(aj)?[0-9]?)\]/g, '<span class="chord">[$1]</span>');
+    }).join('\n');
+  };
+
+  const handleLyricsChange = (e) => {
+    const editor = document.getElementById('lyrics');
+    const rawText = editor.innerText;
+    setFormData(prev => ({
+      ...prev,
+      lyrics: rawText
+    }));
+
+    // Formatear el texto visualmente
+    const formattedText = formatDisplayText(rawText);
+    editor.innerHTML = formattedText;
+
+    // Restaurar la posición del cursor
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  };
+
   const handlePaste = (e) => {
     e.preventDefault();
     const clipboardText = e.clipboardData.getData('text');
     const formattedText = formatPastedLyrics(clipboardText);
     
-    // Insertar el texto formateado en la posición del cursor
+    // Insertar el texto formateado
     const selection = window.getSelection();
     const range = selection.getRangeAt(0);
     range.deleteContents();
     
-    const textNode = document.createTextNode(formattedText);
-    range.insertNode(textNode);
+    // Aplicar el formato visual
+    const displayText = formatDisplayText(formattedText);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = displayText;
     
-    // Mover el cursor al final del texto insertado
-    range.setStartAfter(textNode);
-    range.setEndAfter(textNode);
+    while (tempDiv.firstChild) {
+      range.insertNode(tempDiv.firstChild);
+    }
+    
+    // Mover el cursor al final
+    range.collapse(false);
     selection.removeAllRanges();
     selection.addRange(range);
     
-    // Actualizar el estado
-    const editor = document.getElementById('lyrics');
-    setFormData(prev => ({
-      ...prev,
-      lyrics: editor.innerText
-    }));
-  };
-
-  const handleLyricsChange = (e) => {
+    // Actualizar el estado con el texto plano
     const editor = document.getElementById('lyrics');
     setFormData(prev => ({
       ...prev,
@@ -400,9 +432,10 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                 onInput={handleLyricsChange}
                 onPaste={handlePaste}
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text whitespace-pre-wrap"
-              >
-                {formData.lyrics}
-              </div>
+                dangerouslySetInnerHTML={{ 
+                  __html: formatDisplayText(formData.lyrics || '') 
+                }}
+              />
             </div>
           </div>
 

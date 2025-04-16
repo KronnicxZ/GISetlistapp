@@ -11,7 +11,8 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
   const handleTranspose = (steps) => {
     const newSemitones = steps === 0 ? 0 : semitones + steps;
     setSemitones(newSemitones);
-    setTransposedLyrics(transposeText(song.lyrics || '', newSemitones));
+    const transposed = transposeText(song.lyrics || '', newSemitones);
+    setTransposedLyrics(transposed);
   };
 
   const handleDuplicateWithNewKey = () => {
