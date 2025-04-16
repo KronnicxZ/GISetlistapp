@@ -11,12 +11,16 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
   const handleTranspose = (steps) => {
     const newSemitones = steps === 0 ? 0 : semitones + steps;
     setSemitones(newSemitones);
-    const transposed = transposeText(song.lyrics || '', newSemitones);
-    setTransposedLyrics(transposed);
+    if (newSemitones !== 0) {
+      const transposed = transposeText(song.lyrics || '', newSemitones);
+      setTransposedLyrics(transposed);
+    } else {
+      setTransposedLyrics(song.lyrics || '');
+    }
   };
 
   const handleDuplicateWithNewKey = () => {
-    if (semitones !== 0) {
+    if (semitones !== 0 && onDuplicateSong) {
       const duplicatedSong = {
         ...song,
         title: `${song.title} (${newKey})`,
@@ -135,7 +139,7 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
               </div>
 
               {/* Duplicate Button */}
-              {isAdmin && semitones !== 0 && (
+              {isAdmin && semitones !== 0 && onDuplicateSong && (
                 <button
                   onClick={handleDuplicateWithNewKey}
                   className="w-full bg-[#1a1f2e] hover:bg-[#242937] text-[#FBAE00] p-4 rounded-lg flex items-center justify-center space-x-2"
