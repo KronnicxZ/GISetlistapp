@@ -15,7 +15,6 @@ body {
   font-family: 'Roboto Mono', monospace;
 }
 
-/* Mantener la fuente monoespaciada solo para los acordes */
 .lyrics-text {
   white-space: pre-wrap;
   font-family: 'Roboto Mono', monospace;
@@ -23,45 +22,19 @@ body {
   tab-size: 4;
 }
 
-/* Estilo para acordes usando regex */
-.lyrics-text {
-  color: white;
-}
-
-/* Colorear acordes (cualquier texto entre corchetes que no sea una sección conocida) */
-.lyrics-text {
-  color: white;
-}
-
-.lyrics-text {
-  display: block;
-}
-
-/* Reemplazar el texto que coincida con el patrón de acordes */
-.lyrics-text::content {
-  content: var(--content);
-  color: white;
-}
-
-.lyrics-text::content {
-  content: var(--content);
-  color: white;
-}
-
-/* Aplicar color azul a los acordes */
-.lyrics-text:matches(\\[(?!Intro|Verso|Pre-Coro|Coro|Puente|Instrumental|Final|Outro|Interludio|Solo).*?\\]) {
+.lyrics-text .chord {
   color: #4a9eff;
+  font-weight: 500;
 }
 
-/* Aplicar color dorado a las etiquetas de sección */
-.lyrics-text:matches(\\[(Intro|Verso|Pre-Coro|Coro|Puente|Instrumental|Final|Outro|Interludio|Solo)\\]) {
+.lyrics-text .section {
   color: #FBAE00;
   font-weight: 600;
   display: inline-block;
   margin-top: 0.5em;
 }
 
-/* Estilos para scrollbars personalizados */
+/* Scrollbar styles */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -81,9 +54,9 @@ body {
   background: #3d4761;
 }
 
-/* Estilos para inputs type number */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+/* Input number styles */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
   opacity: 1;
   background: #1a1f2e;
   border-left: 1px solid #2d3548;
@@ -97,15 +70,4 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
-}
-
-.chord {
-  color: #4a9eff;
-}
-
-.section {
-  color: #FBAE00;
-  font-weight: 600;
-  display: inline-block;
-  margin-top: 0.5em;
 } 
