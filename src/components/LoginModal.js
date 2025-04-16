@@ -1,96 +1,96 @@
 import React, { useState } from 'react';
 import { auth } from '../supabase';
 
-const ADMIN_EMAIL = 'kronnicxz@gmail.com';
-
-export default function LoginModal({ isOpen, onClose }) {
-  const [email, setEmail] = useState(ADMIN_EMAIL);
+const LoginModal = ({ isOpen, onClose, onLogin }) => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
 
     try {
-      if (email !== ADMIN_EMAIL) {
-        throw new Error('Solo el administrador puede iniciar sesión');
-      }
+      const { error: signInError } = await auth.signInWithPassword({
+        email,
+        password
+      });
 
-      const result = await auth.signIn(email, password);
+      if (signInError) throw signInError;
 
-      if (result.error) throw result.error;
-
-      if (result.data) {
-        onClose();
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setError(error.message);
+      onLogin();
+      onClose();
+    } catch (err) {
+      setError('Credenciales inválidas');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-[#1a1f2e] rounded-lg p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-6 text-[#FBAE00]">
-          Acceso Administrador
-        </h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-[#1a1f2e] rounded-lg p-6 w-full max-w-md">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-white">Acceso Administrador</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Email
+            <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1">
+              Correo electrónico
             </label>
             <input
               type="email"
+              id="email"
               value={email}
-              disabled
-              className="w-full p-2 rounded bg-[#0f1420] text-white border border-gray-700"
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 bg-[#0f1420] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#FBAE00]"
+              required
             />
-            <p className="text-sm text-gray-400 mt-1">
-              Solo el administrador puede iniciar sesión
-            </p>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-400 mb-1">
               Contraseña
             </label>
             <input
               type="password"
+              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 rounded bg-[#0f1420] text-white border border-gray-700"
+              className="w-full px-3 py-2 bg-[#0f1420] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#FBAE00]"
               required
-              minLength={6}
             />
           </div>
+
           {error && (
-            <p className="text-red-500 text-sm mt-2">{error}</p>
+            <div className="text-red-500 text-sm">{error}</div>
           )}
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-300 hover:text-white"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-[#FBAE00] text-black rounded hover:bg-[#ffc03d] disabled:opacity-50"
-            >
-              {loading ? 'Cargando...' : 'Iniciar Sesión'}
-            </button>
-          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full py-2 px-4 rounded-lg bg-[#FBAE00] text-white font-medium hover:bg-[#fbb827] focus:outline-none focus:ring-2 focus:ring-[#FBAE00] focus:ring-opacity-50 transition-colors
+              ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+          </button>
         </form>
       </div>
     </div>
   );
-} 
+};
+
+export default LoginModal; 
