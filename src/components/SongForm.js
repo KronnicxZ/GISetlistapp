@@ -24,6 +24,73 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const formatPastedLyrics = (text) => {
+    // Lista de acordes comunes
+    const commonChords = [
+      'A', 'Am', 'A7', 'Am7', 'Amaj7', 'A/C#', 'A/E', 'A/G#',
+      'B', 'Bm', 'B7', 'Bm7', 'Bmaj7', 'B/D#', 'B/F#',
+      'C', 'Cm', 'C7', 'Cm7', 'Cmaj7', 'C/E', 'C/G',
+      'D', 'Dm', 'D7', 'Dm7', 'Dmaj7', 'D/F#', 'D/A',
+      'E', 'Em', 'E7', 'Em7', 'Emaj7', 'E/G#', 'E/B',
+      'F', 'Fm', 'F7', 'Fm7', 'Fmaj7', 'F/A', 'F/C',
+      'G', 'Gm', 'G7', 'Gm7', 'Gmaj7', 'G/B', 'G/D'
+    ];
+
+    // Dividir el texto en líneas
+    const lines = text.split('\n');
+    
+    // Procesar cada línea
+    const formattedLines = lines.map(line => {
+      // Buscar acordes en la línea
+      const words = line.split(/\s+/);
+      const formattedWords = words.map(word => {
+        // Verificar si la palabra es un acorde
+        const isChord = commonChords.some(chord => 
+          word.toUpperCase() === chord.toUpperCase() ||
+          word.toUpperCase().startsWith(chord.toUpperCase() + '/')
+        );
+        
+        // Si es un acorde, añadir corchetes
+        if (isChord) {
+          return `[${word}]`;
+        }
+        return word;
+      });
+      
+      return formattedWords.join(' ');
+    });
+    
+    return formattedLines.join('\n');
+  };
+
+  const handlePaste = (e) => {
+    if (e.target.name === 'lyrics') {
+      e.preventDefault();
+      const pastedText = e.clipboardData.getData('text');
+      const formattedText = formatPastedLyrics(pastedText);
+      
+      // Insertar el texto formateado en la posición del cursor
+      const textarea = e.target;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const text = formData.lyrics;
+      const before = text.substring(0, start);
+      const after = text.substring(end);
+      
+      setFormData(prev => ({
+        ...prev,
+        lyrics: before + formattedText + after
+      }));
+      
+      // Restaurar el foco y la posición del cursor
+      setTimeout(() => {
+        textarea.focus();
+        const newCursorPos = start + formattedText.length;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+    }
+  };
+
   const fetchVideoData = async () => {
     if (!formData.youtubeUrl) return;
     
@@ -295,6 +362,7 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                 name="lyrics"
                 value={formData.lyrics || ''}
                 onChange={handleChange}
+                onPaste={handlePaste}
                 rows="6"
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text"
                 placeholder="[Am] Letra de la canción..."
