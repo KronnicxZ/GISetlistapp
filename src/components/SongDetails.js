@@ -22,9 +22,12 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
   const handleDuplicateWithNewKey = () => {
     if (semitones !== 0 && onDuplicateSong) {
       const duplicatedSong = {
-        ...song,
         title: `${song.title} (${newKey})`,
+        artist: song.artist || '',
+        bpm: song.bpm || '',
         key: newKey,
+        genre: song.genre || '',
+        youtubeUrl: song.youtubeUrl || '',
         lyrics: transposedLyrics
       };
       onDuplicateSong(duplicatedSong);
@@ -100,64 +103,66 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
               )}
 
               {/* Controls Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* BPM */}
-                <div className="bg-[#1a1f2e] p-4 rounded-lg">
-                  <p className="text-gray-400 text-sm font-medium mb-1">BPM</p>
-                  <p className="text-[#FBAE00] text-2xl font-bold tabular-nums">{song.bpm || '-'}</p>
-                </div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* BPM */}
+                  <div className="bg-[#1a1f2e] p-4 rounded-lg">
+                    <p className="text-gray-400 text-sm font-medium mb-1">BPM</p>
+                    <p className="text-[#FBAE00] text-2xl font-bold tabular-nums">{song.bpm || '-'}</p>
+                  </div>
 
-                {/* Key */}
-                <div className="bg-[#1a1f2e] p-4 rounded-lg">
-                  <p className="text-gray-400 text-sm font-medium mb-1">Tonalidad</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#FBAE00] text-2xl font-bold">{newKey || '-'}</span>
-                    {song.key && (
-                      <div className="flex items-center gap-3">
-                        <button 
-                          onClick={() => handleTranspose(-1)}
-                          className="text-gray-400 hover:text-white text-lg w-6 h-6 flex items-center justify-center"
-                        >
-                          −
-                        </button>
-                        <button 
-                          onClick={() => handleTranspose(0)}
-                          className="text-gray-400 hover:text-white px-2 text-sm"
-                        >
-                          Reset
-                        </button>
-                        <button 
-                          onClick={() => handleTranspose(1)}
-                          className="text-gray-400 hover:text-white text-lg w-6 h-6 flex items-center justify-center"
-                        >
-                          +
-                        </button>
-                      </div>
-                    )}
+                  {/* Key */}
+                  <div className="bg-[#1a1f2e] p-4 rounded-lg">
+                    <p className="text-gray-400 text-sm font-medium mb-1">Tonalidad</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#FBAE00] text-2xl font-bold">{newKey || '-'}</span>
+                      {song.key && (
+                        <div className="flex items-center gap-3">
+                          <button 
+                            onClick={() => handleTranspose(-1)}
+                            className="text-gray-400 hover:text-white text-lg w-6 h-6 flex items-center justify-center"
+                          >
+                            −
+                          </button>
+                          <button 
+                            onClick={() => handleTranspose(0)}
+                            className="text-gray-400 hover:text-white px-2 text-sm"
+                          >
+                            Reset
+                          </button>
+                          <button 
+                            onClick={() => handleTranspose(1)}
+                            className="text-gray-400 hover:text-white text-lg w-6 h-6 flex items-center justify-center"
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {/* Duplicate Button */}
+                {isAdmin && semitones !== 0 && (
+                  <button
+                    onClick={handleDuplicateWithNewKey}
+                    className="w-full bg-[#1a1f2e] hover:bg-[#242937] text-[#FBAE00] p-4 rounded-lg flex items-center justify-center space-x-2"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+                    </svg>
+                    <span>Duplicar en {newKey}</span>
+                  </button>
+                )}
+
+                {/* Metronome */}
+                {song.bpm && (
+                  <div className="bg-[#1a1f2e] p-4 rounded-lg">
+                    <h3 className="text-gray-400 text-sm font-medium mb-4">Metrónomo</h3>
+                    <Metronome initialBpm={parseInt(song.bpm, 10)} />
+                  </div>
+                )}
               </div>
-
-              {/* Duplicate Button */}
-              {isAdmin && semitones !== 0 && (
-                <button
-                  onClick={handleDuplicateWithNewKey}
-                  className="w-full bg-[#1a1f2e] hover:bg-[#242937] text-[#FBAE00] p-4 rounded-lg flex items-center justify-center space-x-2"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
-                  </svg>
-                  <span>Duplicar en {newKey}</span>
-                </button>
-              )}
-
-              {/* Metronome */}
-              {song.bpm && (
-                <div className="bg-[#1a1f2e] p-4 rounded-lg">
-                  <h3 className="text-gray-400 text-sm font-medium mb-4">Metrónomo</h3>
-                  <Metronome initialBpm={parseInt(song.bpm, 10)} />
-                </div>
-              )}
             </div>
 
             {/* Right Column - Lyrics */}
