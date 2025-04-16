@@ -1,21 +1,12 @@
 import React, { useState } from 'react';
 import Metronome from './Metronome';
-import { transposeText, NOTES } from '../utils/chordTransposer';
+import { transposeText } from '../utils/chordTransposer';
 import { useAuth } from '../context/AuthContext';
-import ChordDiagram from './ChordDiagram';
 
 const SongDetails = ({ song, onClose, onDuplicateSong }) => {
   const [semitones, setSemitones] = useState(0);
   const [transposedLyrics, setTransposedLyrics] = useState(song?.lyrics || '');
-  const [selectedChord, setSelectedChord] = useState(null);
   const { isAdmin } = useAuth();
-
-  // Encontrar el índice de la tonalidad original
-  const originalKeyIndex = NOTES.indexOf(song.key?.replace('m', '') || 'C');
-  
-  // Calcular la nueva tonalidad
-  const newKeyIndex = (originalKeyIndex + semitones + 12) % 12;
-  const newKey = NOTES[newKeyIndex] + (song.key?.includes('m') ? 'm' : '');
 
   const handleTranspose = (steps) => {
     const newSemitones = steps === 0 ? 0 : semitones + steps;
@@ -35,6 +26,15 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
       onClose();
     }
   };
+
+  // Encontrar el índice de la tonalidad original
+  const originalKeyIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    .indexOf(song.key?.replace('m', '') || 'C');
+  
+  // Calcular la nueva tonalidad
+  const newKeyIndex = (originalKeyIndex + semitones + 12) % 12;
+  const newKey = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][newKeyIndex] + 
+    (song.key?.includes('m') ? 'm' : '');
 
   return (
     <div 
@@ -146,48 +146,10 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
               <div className="bg-[#1a1f2e] h-full rounded-lg">
                 <div className="p-4">
                   <h3 className="text-gray-400 text-sm font-medium mb-4">Letra con acordes</h3>
-                  <div className="text-white font-mono text-sm whitespace-pre-wrap lyrics-content">
-                    {transposedLyrics.split('\n').map((line, index) => {
-                      // Detectar si es una etiqueta de sección
-                      if (line.match(/^\[(Intro|Verso|Coro|Pre-Coro|Puente|Instrumental|Final)\]/i)) {
-                        return (
-                          <div key={index} className="text-[#FBAE00] font-semibold mt-4 mb-2">
-                            {line}
-                          </div>
-                        );
-                      }
-                      
-                      // Resaltar acordes en el texto
-                      const parts = line.split(/(\[[^\]]+\])/g);
-                      return (
-                        <div key={index} className="mb-1">
-                          {parts.map((part, partIndex) => {
-                            if (part.startsWith('[') && part.endsWith(']')) {
-                              const chord = part.slice(1, -1);
-                              return (
-                                <button
-                                  key={partIndex}
-                                  onClick={() => setSelectedChord(chord)}
-                                  className="text-[#4a9eff] hover:text-[#7ab8ff] cursor-pointer"
-                                >
-                                  {part}
-                                </button>
-                              );
-                            }
-                            return <span key={partIndex}>{part}</span>;
-                          })}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <pre className="text-white font-mono text-sm whitespace-pre-wrap lyrics-text">
+                    {transposedLyrics || '-'}
+                  </pre>
                 </div>
-
-                {selectedChord && (
-                  <ChordDiagram
-                    chord={selectedChord}
-                    onClose={() => setSelectedChord(null)}
-                  />
-                )}
               </div>
             </div>
           </div>
