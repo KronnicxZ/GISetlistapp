@@ -50,31 +50,21 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
   };
 
   const formatPastedLyrics = (text) => {
-    // Dividir el texto en líneas
-    const lines = text.split('\n');
-    
-    // Procesar cada línea
-    const formattedLines = lines.map(line => {
+    // Dividir el texto en líneas y limpiar espacios extra al inicio y final
+    const lines = text.split('\n').map(line => {
+      // Preservar los espacios iniciales contándolos
+      const leadingSpaces = line.match(/^\s*/)[0];
       const trimmedLine = line.trim();
       if (!trimmedLine) return '';
-
-      // Detectar secciones (INTRO, VERSO, etc.)
-      const sectionPattern = /^(INTRO|VERSO|PRE-?CORO|CORO|PUENTE|INSTRUMENTAL|FINAL)$/i;
-      if (sectionPattern.test(trimmedLine.replace(/[\[\]]/g, ''))) {
-        const sectionName = trimmedLine.replace(/[\[\]]/g, '').toUpperCase();
-        return `[${sectionName}]`;
-      }
-
-      // Dividir la línea en palabras manteniendo espacios
-      const words = trimmedLine.split(/(\s+)/);
       
-      // Procesar cada palabra
+      // Dividir la línea en palabras preservando espacios
+      const words = trimmedLine.split(/(\s+)/);
       const processedWords = words.map(word => {
         const trimmedWord = word.trim();
         if (!trimmedWord) return word; // Mantener espacios originales
-
+        
         // Detectar acordes (incluyendo variaciones comunes)
-        const chordPattern = /^[A-G](#|b)?m?(aj)?[0-9]?$/;
+        const chordPattern = /^[A-G](#|b)?m?(aj|dim|aug|sus|add)?[0-9]?(\/?[A-G][#b]?)?$/;
         if (chordPattern.test(trimmedWord.replace(/[\[\]]/g, ''))) {
           const chord = trimmedWord.replace(/[\[\]]/g, '');
           return `[${chord}]`;
@@ -82,10 +72,28 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
         return word;
       });
 
-      return processedWords.join('');
+      // Reconstruir la línea con los espacios iniciales
+      return leadingSpaces + processedWords.join('');
     });
 
-    return formattedLines.join('\n');
+    // Procesar las líneas para detectar secciones
+    const processedLines = lines.map(line => {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) return '';
+
+      // Detectar secciones (INTRO, VERSO, etc.)
+      const sectionPattern = /^(INTRO|VERSO|PRE-?CORO|CORO|PUENTE|INSTRUMENTAL|FINAL)$/i;
+      if (sectionPattern.test(trimmedLine.replace(/[\[\]]/g, ''))) {
+        const sectionName = trimmedLine.replace(/[\[\]]/g, '').toUpperCase();
+        // Preservar los espacios iniciales
+        const leadingSpaces = line.match(/^\s*/)[0];
+        return `${leadingSpaces}[${sectionName}]`;
+      }
+
+      return line;
+    });
+
+    return processedLines.join('\n');
   };
 
   const formatDisplayText = (text) => {
@@ -126,28 +134,33 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
   const handlePaste = (e) => {
     e.preventDefault();
     const clipboardText = e.clipboardData.getData('text');
+    
+    // Obtener la posición actual del cursor
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    
+    // Formatear el texto manteniendo el orden
     const formattedText = formatPastedLyrics(clipboardText);
     
     // Insertar el texto formateado
-    const selection = window.getSelection();
-    const range = selection.getRangeAt(0);
-    range.deleteContents();
-    
-    // Aplicar el formato visual
     const displayText = formatDisplayText(formattedText);
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = displayText;
     
+    // Limpiar el contenido existente en el rango
+    range.deleteContents();
+    
+    // Insertar el nuevo contenido
     while (tempDiv.firstChild) {
       range.insertNode(tempDiv.firstChild);
     }
     
-    // Mover el cursor al final
+    // Mover el cursor al final del texto insertado
     range.collapse(false);
     selection.removeAllRanges();
     selection.addRange(range);
     
-    // Actualizar el estado con el texto plano
+    // Actualizar el estado
     const editor = document.getElementById('lyrics');
     setFormData(prev => ({
       ...prev,
