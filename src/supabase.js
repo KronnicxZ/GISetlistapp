@@ -23,6 +23,15 @@ export const auth = {
   },
 
   signUp: async (email, password) => {
+    // Solo permitir registro con el email del administrador
+    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL;
+    if (email !== adminEmail) {
+      return { 
+        data: null, 
+        error: { message: 'El registro está deshabilitado. Solo el administrador puede crear una cuenta.' }
+      };
+    }
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,

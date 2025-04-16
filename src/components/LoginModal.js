@@ -8,7 +8,6 @@ export default function LoginModal({ isOpen, onClose }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isRegistering, setIsRegistering] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,12 +19,7 @@ export default function LoginModal({ isOpen, onClose }) {
         throw new Error('Solo el administrador puede iniciar sesión');
       }
 
-      let result;
-      if (isRegistering) {
-        result = await auth.signUp(email, password);
-      } else {
-        result = await auth.signIn(email, password);
-      }
+      const result = await auth.signIn(email, password);
 
       if (result.error) throw result.error;
 
@@ -46,7 +40,7 @@ export default function LoginModal({ isOpen, onClose }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div className="bg-[#1a1f2e] rounded-lg p-8 max-w-md w-full">
         <h2 className="text-2xl font-bold mb-6 text-[#FBAE00]">
-          {isRegistering ? 'Registro de Admin' : 'Iniciar Sesión'}
+          Acceso Administrador
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -59,6 +53,9 @@ export default function LoginModal({ isOpen, onClose }) {
               disabled
               className="w-full p-2 rounded bg-[#0f1420] text-white border border-gray-700"
             />
+            <p className="text-sm text-gray-400 mt-1">
+              Solo el administrador puede iniciar sesión
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -76,36 +73,21 @@ export default function LoginModal({ isOpen, onClose }) {
           {error && (
             <p className="text-red-500 text-sm mt-2">{error}</p>
           )}
-          <div className="flex flex-col space-y-4">
+          <div className="flex justify-end space-x-4">
             <button
               type="button"
-              onClick={() => setIsRegistering(!isRegistering)}
-              className="text-sm text-gray-400 hover:text-[#FBAE00] text-center"
+              onClick={onClose}
+              className="px-4 py-2 text-sm text-gray-300 hover:text-white"
             >
-              {isRegistering 
-                ? '¿Ya tienes cuenta? Inicia sesión' 
-                : '¿Primera vez? Registra la cuenta de admin'}
+              Cancelar
             </button>
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-4 py-2 bg-[#FBAE00] text-black rounded hover:bg-[#ffc03d] disabled:opacity-50"
-              >
-                {loading
-                  ? 'Cargando...'
-                  : isRegistering
-                  ? 'Registrar Admin'
-                  : 'Iniciar Sesión'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-[#FBAE00] text-black rounded hover:bg-[#ffc03d] disabled:opacity-50"
+            >
+              {loading ? 'Cargando...' : 'Iniciar Sesión'}
+            </button>
           </div>
         </form>
       </div>
