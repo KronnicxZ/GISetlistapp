@@ -23,37 +23,34 @@ const SongList = ({
     const fetchDurations = async () => {
       console.log('Iniciando fetchDurations para', songs.length, 'canciones');
       const durations = {};
+      const pendingDurations = songs.filter(
+        song => song.youtubeUrl && !songDurations[song.id]
+      );
+
+      console.log('Canciones pendientes de obtener duración:', pendingDurations.length);
       
-      for (const song of songs) {
+      for (const song of pendingDurations) {
         console.log('Procesando canción:', song.title, 'URL:', song.youtubeUrl);
+        const videoId = extractYoutubeVideoId(song.youtubeUrl);
         
-        if (song.youtubeUrl && !songDurations[song.id]) {
-          console.log('Obteniendo duración para:', song.title);
-          const videoId = extractYoutubeVideoId(song.youtubeUrl);
-          
-          if (videoId) {
-            console.log('ID de video encontrado:', videoId);
-            const duration = await getVideoDuration(videoId);
-            console.log('Duración obtenida para', song.title + ':', duration);
-            durations[song.id] = duration;
-          } else {
-            console.log('No se pudo extraer ID de video para:', song.title);
-          }
+        if (videoId) {
+          console.log('ID de video encontrado:', videoId);
+          const duration = await getVideoDuration(videoId);
+          console.log('Duración obtenida para', song.title + ':', duration);
+          durations[song.id] = duration;
         } else {
-          console.log('Saltando canción:', song.title, '- Sin URL o ya tiene duración');
+          console.log('No se pudo extraer ID de video para:', song.title);
         }
       }
       
-      console.log('Duraciones obtenidas:', durations);
-      setSongDurations(prev => {
-        const newDurations = { ...prev, ...durations };
-        console.log('Nuevas duraciones:', newDurations);
-        return newDurations;
-      });
+      if (Object.keys(durations).length > 0) {
+        console.log('Actualizando duraciones:', durations);
+        setSongDurations(prev => ({ ...prev, ...durations }));
+      }
     };
 
     fetchDurations();
-  }, [songs, songDurations]);
+  }, [songs]); // Solo depende de songs, no de songDurations
 
   // Efecto para cerrar el menú cuando se hace clic fuera
   useEffect(() => {
