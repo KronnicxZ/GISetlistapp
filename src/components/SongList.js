@@ -21,21 +21,39 @@ const SongList = ({
 
   useEffect(() => {
     const fetchDurations = async () => {
+      console.log('Iniciando fetchDurations para', songs.length, 'canciones');
       const durations = {};
+      
       for (const song of songs) {
+        console.log('Procesando canción:', song.title, 'URL:', song.youtubeUrl);
+        
         if (song.youtubeUrl && !songDurations[song.id]) {
+          console.log('Obteniendo duración para:', song.title);
           const videoId = extractYoutubeVideoId(song.youtubeUrl);
+          
           if (videoId) {
+            console.log('ID de video encontrado:', videoId);
             const duration = await getVideoDuration(videoId);
+            console.log('Duración obtenida para', song.title + ':', duration);
             durations[song.id] = duration;
+          } else {
+            console.log('No se pudo extraer ID de video para:', song.title);
           }
+        } else {
+          console.log('Saltando canción:', song.title, '- Sin URL o ya tiene duración');
         }
       }
-      setSongDurations(prev => ({ ...prev, ...durations }));
+      
+      console.log('Duraciones obtenidas:', durations);
+      setSongDurations(prev => {
+        const newDurations = { ...prev, ...durations };
+        console.log('Nuevas duraciones:', newDurations);
+        return newDurations;
+      });
     };
 
     fetchDurations();
-  }, [songs]);
+  }, [songs, songDurations]);
 
   // Efecto para cerrar el menú cuando se hace clic fuera
   useEffect(() => {
