@@ -21,12 +21,14 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
     if (name === 'lyrics') {
+      const value = e.target.innerHTML;
       // Formatear el texto mientras se escribe
       const formattedText = formatPastedLyrics(value);
-      setFormData(prev => ({ ...prev, [name]: formattedText }));
+      setFormData(prev => ({ ...prev, lyrics: formattedText }));
     } else {
+      const value = e.target.value;
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
@@ -85,7 +87,7 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
         if (sections.some(section => 
           sectionContent.toLowerCase().includes(section.toLowerCase())
         )) {
-          return `<span data-section="true">[${sectionContent}]</span>`;
+          return `<span class="section">[${sectionContent}]</span>`;
         }
       }
 
@@ -103,7 +105,7 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
             (chordContent.includes('/') && 
              commonChords.some(c => chordContent.toUpperCase().startsWith(c.toUpperCase() + '/')))
           )) {
-            return `<span data-chord="true">[${chordContent}]</span>`;
+            return `<span class="chord">[${chordContent}]</span>`;
           }
         } else if (commonChords.some(chord => 
           trimmedWord.toUpperCase() === chord.toUpperCase() ||
@@ -111,7 +113,7 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
            commonChords.some(c => trimmedWord.toUpperCase().startsWith(c.toUpperCase() + '/')))
         ) && (index === 0 || words[index - 1] === '')) {
           // Si es un acorde sin corchetes, agregárselos
-          return `<span data-chord="true">[${word}]</span>`;
+          return `<span class="chord">[${word}]</span>`;
         }
         return word;
       });
@@ -123,30 +125,36 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
   };
 
   const handlePaste = (e) => {
-    if (e.target.name === 'lyrics') {
+    if (e.target.getAttribute('name') === 'lyrics') {
       e.preventDefault();
       const pastedText = e.clipboardData.getData('text');
       const formattedText = formatPastedLyrics(pastedText);
       
       // Insertar el texto formateado en la posición del cursor
-      const textarea = e.target;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = formData.lyrics;
-      const before = text.substring(0, start);
-      const after = text.substring(end);
+      const selection = window.getSelection();
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
       
+      // Crear un elemento temporal para insertar el HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = formattedText;
+      
+      // Insertar cada nodo del contenido formateado
+      while (tempDiv.firstChild) {
+        range.insertNode(tempDiv.firstChild);
+      }
+      
+      // Mover el cursor al final del texto insertado
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      // Actualizar el estado
+      const editor = document.getElementById('lyrics');
       setFormData(prev => ({
         ...prev,
-        lyrics: before + formattedText + after
+        lyrics: editor.innerHTML
       }));
-      
-      // Restaurar el foco y la posición del cursor
-      setTimeout(() => {
-        textarea.focus();
-        const newCursorPos = start + formattedText.length;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-      }, 0);
     }
   };
 
@@ -205,29 +213,33 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
   };
 
   const insertSectionTag = (sectionType) => {
-    const textarea = document.getElementById('lyrics');
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = formData.lyrics;
-    const before = text.substring(0, start);
-    const selection = text.substring(start, end);
-    const after = text.substring(end);
+    const editor = document.getElementById('lyrics');
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
     
-    // Crear el tag de sección con el atributo data-section
-    const sectionTag = `<span data-section="true">[${sectionType}]</span>\n`;
+    // Crear el tag de sección
+    const sectionTag = `<span class="section">[${sectionType}]</span>\n`;
     
-    // Insertar el tag y mantener el texto seleccionado
-    const newText = before + sectionTag + selection + after;
+    // Crear un elemento temporal para insertar el HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = sectionTag;
+    
+    // Insertar el nodo de sección
+    range.insertNode(tempDiv.firstChild);
+    
+    // Mover el cursor después del tag insertado
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
     
     // Actualizar el estado
-    setFormData(prev => ({ ...prev, lyrics: newText }));
+    setFormData(prev => ({
+      ...prev,
+      lyrics: editor.innerHTML
+    }));
     
-    // Restaurar el foco y la posición del cursor
-    setTimeout(() => {
-      textarea.focus();
-      const newCursorPos = start + sectionTag.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
+    // Mantener el foco en el editor
+    editor.focus();
   };
 
   return (
@@ -416,15 +428,14 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                   </button>
                 </div>
               </div>
-              <textarea
+              <div
                 id="lyrics"
                 name="lyrics"
-                value={formData.lyrics || ''}
-                onChange={handleChange}
+                contentEditable
+                onInput={handleChange}
                 onPaste={handlePaste}
-                rows="6"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text"
-                placeholder="[Am] Letra de la canción..."
+                className="w-full min-h-[150px] px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text"
+                dangerouslySetInnerHTML={{ __html: formData.lyrics || '' }}
               />
             </div>
           </div>

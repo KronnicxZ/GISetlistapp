@@ -23,14 +23,38 @@ body {
   tab-size: 4;
 }
 
-/* Estilo para acordes */
-.lyrics-text [data-chord="true"] {
-  color: #4a9eff;
-  font-weight: 500;
+/* Estilo para acordes usando regex */
+.lyrics-text {
+  color: white;
 }
 
-/* Estilo para etiquetas de sección */
-.lyrics-text [data-section="true"] {
+/* Colorear acordes (cualquier texto entre corchetes que no sea una sección conocida) */
+.lyrics-text {
+  color: white;
+}
+
+.lyrics-text {
+  display: block;
+}
+
+/* Reemplazar el texto que coincida con el patrón de acordes */
+.lyrics-text::content {
+  content: var(--content);
+  color: white;
+}
+
+.lyrics-text::content {
+  content: var(--content);
+  color: white;
+}
+
+/* Aplicar color azul a los acordes */
+.lyrics-text:matches(\\[(?!Intro|Verso|Pre-Coro|Coro|Puente|Instrumental|Final|Outro|Interludio|Solo).*?\\]) {
+  color: #4a9eff;
+}
+
+/* Aplicar color dorado a las etiquetas de sección */
+.lyrics-text:matches(\\[(Intro|Verso|Pre-Coro|Coro|Puente|Instrumental|Final|Outro|Interludio|Solo)\\]) {
   color: #FBAE00;
   font-weight: 600;
   display: inline-block;
@@ -73,4 +97,15 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+.chord {
+  color: #4a9eff;
+}
+
+.section {
+  color: #FBAE00;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 0.5em;
 } 
