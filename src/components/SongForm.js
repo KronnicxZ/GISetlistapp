@@ -19,13 +19,14 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     // Formatear el texto para mostrar
     const formatDisplayText = (text) => {
       if (!text) return '';
+      
       return text.split('\n').map(line => {
         // Detectar si es una etiqueta de sección
         if (line.match(/^\[(Intro|Verso|Coro|Pre-Coro|Puente|Instrumental|Final)\]/i)) {
-          return `<div class="text-[#FBAE00] font-semibold mt-4 mb-2">${line}</div>`;
+          return `<div class="text-[#FBAE00] font-semibold">${line}</div>`;
         }
         
-        // Resaltar acordes
+        // Resaltar acordes manteniendo el espaciado
         return line.replace(/(\[[^\]]+\])/g, '<span class="text-[#4a9eff]">$1</span>');
       }).join('\n');
     };
@@ -406,14 +407,14 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                   onChange={handleChange}
                   onPaste={handlePaste}
                   rows="6"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text font-mono text-sm"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-transparent placeholder-transparent focus:outline-none focus:border-[#FBAE00] font-mono text-sm"
                   placeholder="[Am] Letra de la canción..."
                   style={{ caretColor: 'white' }}
                 />
                 <div 
-                  className="absolute top-0 left-0 w-full h-full pointer-events-none px-3 py-2"
+                  className="absolute top-0 left-0 w-full h-full pointer-events-none px-3 py-2 font-mono text-sm whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{ 
-                    __html: displayText || '<span class="text-gray-500">[Am] Letra de la canción...</span>' 
+                    __html: formatDisplayText(formData.lyrics) || '<span class="text-gray-500">[Am] Letra de la canción...</span>'
                   }}
                 />
               </div>
