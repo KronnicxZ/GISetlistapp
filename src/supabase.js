@@ -95,11 +95,22 @@ export const songs = {
           try {
             const duration = await getVideoDuration(videoId);
             console.log('Duración obtenida:', duration);
-            song.duration = duration;
+            // Solo asignar la duración si se obtuvo un valor válido
+            if (duration) {
+              song.duration = duration;
+            } else {
+              song.duration = '-'; // Valor por defecto si no se pudo obtener la duración
+            }
           } catch (error) {
             console.error('Error al obtener duración:', error);
+            song.duration = '-'; // Valor por defecto en caso de error
           }
+        } else {
+          console.log('No se pudo extraer el ID del video');
+          song.duration = '-'; // Valor por defecto si no hay ID válido
         }
+      } else {
+        song.duration = '-'; // Valor por defecto si no hay URL de YouTube
       }
 
       // Crear la canción con la duración incluida
