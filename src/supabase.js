@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-import { supabase } from './supabaseClient'
 import { extractYoutubeVideoId, getVideoDuration } from './utils/youtube'
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
@@ -12,7 +11,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Error: Faltan las variables de entorno de Supabase')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Funciones auxiliares para interactuar con Supabase
 export const auth = {
