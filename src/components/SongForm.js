@@ -191,21 +191,36 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Género
-              </label>
-              <select
-                name="genre"
-                value={formData.genre || ''}
-                onChange={handleChange}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#FBAE00]"
-              >
-                <option value="">Seleccionar categoría</option>
-                <option value="adoracion">Adoración</option>
-                <option value="alabanza">Alabanza</option>
-                <option value="ofrenda">Ofrenda</option>
-              </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Género
+                </label>
+                <select
+                  name="genre"
+                  value={formData.genre || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#FBAE00]"
+                >
+                  <option value="">Seleccionar categoría</option>
+                  <option value="adoracion">Adoración</option>
+                  <option value="alabanza">Alabanza</option>
+                  <option value="ofrenda">Ofrenda</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">
+                  Duración
+                </label>
+                <input
+                  type="text"
+                  name="duration"
+                  value={formData.duration || '-'}
+                  readOnly
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00]"
+                />
+              </div>
             </div>
 
             <div>

@@ -15,42 +15,8 @@ const SongList = ({
   const [selectedSongs, setSelectedSongs] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [songToDelete, setSongToDelete] = useState(null);
-  const [songDurations, setSongDurations] = useState({});
   const [openMenuId, setOpenMenuId] = useState(null);
   const { isAdmin } = useAuth();
-
-  useEffect(() => {
-    const fetchDurations = async () => {
-      console.log('Iniciando fetchDurations para', songs.length, 'canciones');
-      const durations = {};
-      const pendingDurations = songs.filter(
-        song => song.youtubeUrl && !songDurations[song.id]
-      );
-
-      console.log('Canciones pendientes de obtener duración:', pendingDurations.length);
-      
-      for (const song of pendingDurations) {
-        console.log('Procesando canción:', song.title, 'URL:', song.youtubeUrl);
-        const videoId = extractYoutubeVideoId(song.youtubeUrl);
-        
-        if (videoId) {
-          console.log('ID de video encontrado:', videoId);
-          const duration = await getVideoDuration(videoId);
-          console.log('Duración obtenida para', song.title + ':', duration);
-          durations[song.id] = duration;
-        } else {
-          console.log('No se pudo extraer ID de video para:', song.title);
-        }
-      }
-      
-      if (Object.keys(durations).length > 0) {
-        console.log('Actualizando duraciones:', durations);
-        setSongDurations(prev => ({ ...prev, ...durations }));
-      }
-    };
-
-    fetchDurations();
-  }, [songs]); // Solo depende de songs, no de songDurations
 
   // Efecto para cerrar el menú cuando se hace clic fuera
   useEffect(() => {
@@ -210,7 +176,7 @@ const SongList = ({
                 <td className="py-4 px-4 text-gray-400">{song.genre || '-'}</td>
                 <td className="py-4 px-4">{song.bpm || '-'}</td>
                 <td className="py-4 px-4">{song.key || '-'}</td>
-                <td className="py-4 px-4">{songDurations[song.id] || '-'}</td>
+                <td className="py-4 px-4">{song.duration || '-'}</td>
                 {(onEditSong || onDeleteSong || onDuplicateSong) && (
                   <td className="py-4 px-4 relative" onClick={e => e.stopPropagation()}>
                     <div className="song-menu">
@@ -251,6 +217,21 @@ const SongList = ({
                                 <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                               </svg>
                               <span>Eliminar</span>
+                            </button>
+                          )}
+                          {onDuplicateSong && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDuplicateSong(song);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full px-4 py-2 text-sm text-left text-white hover:bg-gray-800 flex items-center space-x-2"
+                            >
+                              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                              </svg>
+                              <span>Duplicar</span>
                             </button>
                           )}
                         </div>
