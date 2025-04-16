@@ -14,16 +14,20 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
     setError(null);
 
     try {
-      const { error: signInError } = await auth.signInWithPassword({
-        email: ADMIN_EMAIL,
-        password
-      });
+      const { data, error: signInError } = await auth.signIn(ADMIN_EMAIL, password);
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        console.error('Error de inicio de sesión:', signInError);
+        throw signInError;
+      }
 
-      onLogin();
-      onClose();
+      if (data) {
+        console.log('Inicio de sesión exitoso:', data);
+        onLogin();
+        onClose();
+      }
     } catch (err) {
+      console.error('Error completo:', err);
       setError('Contraseña inválida');
     } finally {
       setIsLoading(false);
