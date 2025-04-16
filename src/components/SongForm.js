@@ -33,6 +33,7 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
       setFetchError(null);
       
       const videoId = extractYoutubeVideoId(formData.youtubeUrl);
+      console.log('ID del video extraído:', videoId);
       
       if (!videoId) {
         throw new Error('URL de YouTube no válida');
@@ -61,15 +62,24 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
       }
 
       // Obtener duración del video
+      console.log('Obteniendo duración del video...');
       const duration = await getVideoDuration(videoId);
       console.log('Duración obtenida:', duration);
       
-      setFormData(prev => ({
-        ...prev,
-        title: songTitle,
-        artist: artist,
-        duration: duration || '-'
-      }));
+      if (!duration) {
+        console.warn('No se pudo obtener la duración del video');
+      }
+      
+      setFormData(prev => {
+        const newData = {
+          ...prev,
+          title: songTitle,
+          artist: artist,
+          duration: duration || '-'
+        };
+        console.log('Actualizando formulario con:', newData);
+        return newData;
+      });
       
     } catch (error) {
       console.error('Error al obtener datos del video:', error);
