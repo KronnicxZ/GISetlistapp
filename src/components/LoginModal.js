@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { auth } from '../supabase';
 
+const ADMIN_EMAIL = 'kronnicxz@gmail.com';
+
 const LoginModal = ({ isOpen, onClose, onLogin }) => {
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -14,7 +15,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
 
     try {
       const { error: signInError } = await auth.signInWithPassword({
-        email,
+        email: ADMIN_EMAIL,
         password
       });
 
@@ -23,7 +24,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
       onLogin();
       onClose();
     } catch (err) {
-      setError('Credenciales inválidas');
+      setError('Contraseña inválida');
     } finally {
       setIsLoading(false);
     }
@@ -48,20 +49,6 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1">
-              Correo electrónico
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 bg-[#0f1420] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#FBAE00]"
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-400 mb-1">
               Contraseña
             </label>
@@ -72,6 +59,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 bg-[#0f1420] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#FBAE00]"
               required
+              placeholder="Ingresa la contraseña de administrador"
             />
           </div>
 
