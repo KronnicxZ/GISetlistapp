@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { transposeText, NOTES } from '../utils/chordTransposer';
+import { transposeText } from '../utils/chordTransposer';
 
 const PlayerModal = ({ song, onClose }) => {
   const [semitones, setSemitones] = useState(0);
@@ -10,16 +10,19 @@ const PlayerModal = ({ song, onClose }) => {
   const videoId = song.youtubeUrl ? song.youtubeUrl.split('v=')[1]?.split('&')[0] : null;
 
   const handleTranspose = (steps) => {
-    setSemitones(steps);
-    setTransposedLyrics(transposeText(song.lyrics || '', steps));
+    const newSemitones = steps === 0 ? 0 : semitones + steps;
+    setSemitones(newSemitones);
+    setTransposedLyrics(transposeText(song.lyrics || '', newSemitones));
   };
 
   // Encontrar el índice de la tonalidad original
-  const originalKeyIndex = NOTES.indexOf(song.key?.replace('m', '') || 'C');
+  const originalKeyIndex = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    .indexOf(song.key?.replace('m', '') || 'C');
   
   // Calcular la nueva tonalidad
   const newKeyIndex = (originalKeyIndex + semitones + 12) % 12;
-  const newKey = NOTES[newKeyIndex] + (song.key?.includes('m') ? 'm' : '');
+  const newKey = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][newKeyIndex] + 
+    (song.key?.includes('m') ? 'm' : '');
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 z-50 overflow-y-auto">
@@ -71,7 +74,7 @@ const PlayerModal = ({ song, onClose }) => {
                     <p className="font-bold text-[#FBAE00]">{newKey}</p>
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => handleTranspose(semitones - 1)}
+                        onClick={() => handleTranspose(-1)}
                         className="text-gray-400 hover:text-white p-1"
                       >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -85,7 +88,7 @@ const PlayerModal = ({ song, onClose }) => {
                         Reset
                       </button>
                       <button
-                        onClick={() => handleTranspose(semitones + 1)}
+                        onClick={() => handleTranspose(1)}
                         className="text-gray-400 hover:text-white p-1"
                       >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -98,11 +101,13 @@ const PlayerModal = ({ song, onClose }) => {
               </div>
             </div>
             
-            <div className="bg-[#1a1f2e] h-full rounded-lg">
-              <div className="p-4">
-                <h3 className="text-gray-400 text-sm font-medium mb-4">Letra con acordes</h3>
+            <div className="bg-gray-800 rounded-lg flex flex-col h-[60vh] lg:h-[70vh]">
+              <h4 className="font-medium text-white sticky top-0 bg-gray-800 p-4 border-b border-gray-700">
+                Letra con acordes
+              </h4>
+              <div className="p-4 overflow-y-auto flex-1">
                 <pre className="whitespace-pre-wrap lyrics-text text-gray-300">
-                  {song.lyrics || '-'}
+                  {transposedLyrics}
                 </pre>
               </div>
             </div>
