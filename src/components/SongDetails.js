@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import Metronome from './Metronome';
 import { transposeText, NOTES } from '../utils/chordTransposer';
 import { useAuth } from '../context/AuthContext';
+import ChordDiagram from './ChordDiagram';
 
 const SongDetails = ({ song, onClose, onDuplicateSong }) => {
   const [semitones, setSemitones] = useState(0);
   const [transposedLyrics, setTransposedLyrics] = useState(song?.lyrics || '');
+  const [selectedChord, setSelectedChord] = useState(null);
   const { isAdmin } = useAuth();
 
   // Encontrar el índice de la tonalidad original
@@ -161,7 +163,16 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
                         <div key={index} className="mb-1">
                           {parts.map((part, partIndex) => {
                             if (part.startsWith('[') && part.endsWith(']')) {
-                              return <span key={partIndex} className="text-[#4a9eff]">{part}</span>;
+                              const chord = part.slice(1, -1);
+                              return (
+                                <button
+                                  key={partIndex}
+                                  onClick={() => setSelectedChord(chord)}
+                                  className="text-[#4a9eff] hover:text-[#7ab8ff] cursor-pointer"
+                                >
+                                  {part}
+                                </button>
+                              );
                             }
                             return <span key={partIndex}>{part}</span>;
                           })}
@@ -170,6 +181,13 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
                     })}
                   </div>
                 </div>
+
+                {selectedChord && (
+                  <ChordDiagram
+                    chord={selectedChord}
+                    onClose={() => setSelectedChord(null)}
+                  />
+                )}
               </div>
             </div>
           </div>
