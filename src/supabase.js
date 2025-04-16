@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { extractYoutubeVideoId, getVideoDuration } from './utils/youtube'
+import { extractYoutubeVideoId } from './utils/youtube'
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
@@ -86,40 +86,10 @@ export const songs = {
     try {
       console.log('Intentando crear canción:', song)
       
-      // Si hay una URL de YouTube, obtener la duración
-      if (song.youtubeUrl) {
-        console.log('Obteniendo duración para:', song.youtubeUrl);
-        const videoId = extractYoutubeVideoId(song.youtubeUrl);
-        if (videoId) {
-          console.log('ID del video:', videoId);
-          try {
-            const duration = await getVideoDuration(videoId);
-            console.log('Duración obtenida:', duration);
-            // Solo asignar la duración si se obtuvo un valor válido
-            if (duration) {
-              song.duration = duration;
-            } else {
-              song.duration = '-'; // Valor por defecto si no se pudo obtener la duración
-            }
-          } catch (error) {
-            console.error('Error al obtener duración:', error);
-            song.duration = '-'; // Valor por defecto en caso de error
-          }
-        } else {
-          console.log('No se pudo extraer el ID del video');
-          song.duration = '-'; // Valor por defecto si no hay ID válido
-        }
-      } else {
-        song.duration = '-'; // Valor por defecto si no hay URL de YouTube
-      }
-
-      // Crear la canción con la duración incluida
+      // Crear la canción
       const { data, error } = await supabase
         .from('songs')
-        .insert([{
-          ...song,
-          duration: song.duration || '-'
-        }])
+        .insert([song])
         .select()
       
       if (error) {
@@ -136,31 +106,9 @@ export const songs = {
 
   update: async (id, updates) => {
     try {
-      // Si hay una URL de YouTube, actualizar la duración
-      if (updates.youtubeUrl) {
-        console.log('Actualizando duración para:', updates.youtubeUrl);
-        const videoId = extractYoutubeVideoId(updates.youtubeUrl);
-        if (videoId) {
-          console.log('ID del video:', videoId);
-          try {
-            const duration = await getVideoDuration(videoId);
-            console.log('Duración obtenida:', duration);
-            updates.duration = duration || '-';
-          } catch (error) {
-            console.error('Error al obtener duración:', error);
-            updates.duration = '-';
-          }
-        } else {
-          updates.duration = '-';
-        }
-      }
-
       const { data, error } = await supabase
         .from('songs')
-        .update({
-          ...updates,
-          duration: updates.duration || '-'
-        })
+        .update(updates)
         .eq('id', id)
         .select()
       return { data, error }

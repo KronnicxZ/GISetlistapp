@@ -135,7 +135,6 @@ const SongList = ({
               <th className="py-3 px-4 font-medium">Género</th>
               <th className="py-3 px-4 font-medium">BPM</th>
               <th className="py-3 px-4 font-medium">Tono</th>
-              <th className="py-3 px-4 font-medium">Duración</th>
               {(onEditSong || onDeleteSong || onDuplicateSong) && (
                 <th className="py-3 px-4 font-medium w-10">
                   <span className="sr-only">Acciones</span>
@@ -176,7 +175,6 @@ const SongList = ({
                 <td className="py-4 px-4 text-gray-400">{song.genre || '-'}</td>
                 <td className="py-4 px-4">{song.bpm || '-'}</td>
                 <td className="py-4 px-4">{song.key || '-'}</td>
-                <td className="py-4 px-4">{song.duration || '-'}</td>
                 {(onEditSong || onDeleteSong || onDuplicateSong) && (
                   <td className="py-4 px-4 relative" onClick={e => e.stopPropagation()}>
                     <div className="song-menu">

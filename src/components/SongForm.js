@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { extractYoutubeVideoId, getVideoDuration } from '../utils/youtube';
+import { extractYoutubeVideoId } from '../utils/youtube';
 
 const SongForm = ({ initialData, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState(initialData || {
@@ -9,8 +9,7 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     key: '',
     genre: '',
     youtubeUrl: '',
-    lyrics: '',
-    duration: '-'
+    lyrics: ''
   });
   const [isFetching, setIsFetching] = useState(false);
   const [fetchError, setFetchError] = useState(null);
@@ -61,21 +60,11 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
         songTitle = titleParts[0];
       }
 
-      // Obtener duración del video
-      console.log('Obteniendo duración del video...');
-      const duration = await getVideoDuration(videoId);
-      console.log('Duración obtenida:', duration);
-      
-      if (!duration) {
-        console.warn('No se pudo obtener la duración del video');
-      }
-      
       setFormData(prev => {
         const newData = {
           ...prev,
           title: songTitle,
-          artist: artist,
-          duration: duration || '-'
+          artist: artist
         };
         console.log('Actualizando formulario con:', newData);
         return newData;
@@ -217,19 +206,6 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                   <option value="alabanza">Alabanza</option>
                   <option value="ofrenda">Ofrenda</option>
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Duración
-                </label>
-                <input
-                  type="text"
-                  name="duration"
-                  value={formData.duration || '-'}
-                  readOnly
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00]"
-                />
               </div>
             </div>
 
