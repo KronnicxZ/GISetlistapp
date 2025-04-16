@@ -88,18 +88,22 @@ export const songs = {
       console.log('Intentando crear canción:', song)
       
       // Si hay una URL de YouTube, obtener la duración
-      let duration = null;
       if (song.youtubeUrl) {
         console.log('Obteniendo duración para:', song.youtubeUrl);
         const videoId = extractYoutubeVideoId(song.youtubeUrl);
         if (videoId) {
           console.log('ID del video:', videoId);
-          duration = await getVideoDuration(videoId);
-          console.log('Duración obtenida:', duration);
-          song.duration = duration;
+          try {
+            const duration = await getVideoDuration(videoId);
+            console.log('Duración obtenida:', duration);
+            song.duration = duration;
+          } catch (error) {
+            console.error('Error al obtener duración:', error);
+          }
         }
       }
 
+      // Crear la canción con la duración incluida
       const { data, error } = await supabase
         .from('songs')
         .insert([song])
@@ -118,12 +122,33 @@ export const songs = {
   },
 
   update: async (id, updates) => {
-    const { data, error } = await supabase
-      .from('songs')
-      .update(updates)
-      .eq('id', id)
-      .select()
-    return { data, error }
+    try {
+      // Si hay una URL de YouTube, actualizar la duración
+      if (updates.youtubeUrl) {
+        console.log('Actualizando duración para:', updates.youtubeUrl);
+        const videoId = extractYoutubeVideoId(updates.youtubeUrl);
+        if (videoId) {
+          console.log('ID del video:', videoId);
+          try {
+            const duration = await getVideoDuration(videoId);
+            console.log('Duración obtenida:', duration);
+            updates.duration = duration;
+          } catch (error) {
+            console.error('Error al obtener duración:', error);
+          }
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('songs')
+        .update(updates)
+        .eq('id', id)
+        .select()
+      return { data, error }
+    } catch (err) {
+      console.error('Error al actualizar canción:', err)
+      return { data: null, error: err }
+    }
   },
 
   delete: async (id) => {
