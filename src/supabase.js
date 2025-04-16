@@ -116,7 +116,10 @@ export const songs = {
       // Crear la canción con la duración incluida
       const { data, error } = await supabase
         .from('songs')
-        .insert([song])
+        .insert([{
+          ...song,
+          duration: song.duration || '-'
+        }])
         .select()
       
       if (error) {
@@ -142,16 +145,22 @@ export const songs = {
           try {
             const duration = await getVideoDuration(videoId);
             console.log('Duración obtenida:', duration);
-            updates.duration = duration;
+            updates.duration = duration || '-';
           } catch (error) {
             console.error('Error al obtener duración:', error);
+            updates.duration = '-';
           }
+        } else {
+          updates.duration = '-';
         }
       }
 
       const { data, error } = await supabase
         .from('songs')
-        .update(updates)
+        .update({
+          ...updates,
+          duration: updates.duration || '-'
+        })
         .eq('id', id)
         .select()
       return { data, error }
