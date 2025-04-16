@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { extractYoutubeVideoId } from '../utils/youtube';
+import LyricsDisplay from './LyricsDisplay';
 
 const SongForm = ({ initialData, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState(initialData || {
@@ -13,26 +14,6 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
   });
   const [isFetching, setIsFetching] = useState(false);
   const [fetchError, setFetchError] = useState(null);
-  const [displayText, setDisplayText] = useState('');
-
-  useEffect(() => {
-    // Formatear el texto para mostrar
-    const formatDisplayText = (text) => {
-      if (!text) return '';
-      
-      return text.split('\n').map(line => {
-        // Detectar si es una etiqueta de sección
-        if (line.match(/^\[(Intro|Verso|Coro|Pre-Coro|Puente|Instrumental|Final)\]/i)) {
-          return `<div class="text-[#FBAE00] font-semibold">${line}</div>`;
-        }
-        
-        // Resaltar acordes manteniendo el espaciado
-        return line.replace(/(\[[^\]]+\])/g, '<span class="text-[#4a9eff]">$1</span>');
-      }).join('\n');
-    };
-
-    setDisplayText(formatDisplayText(formData.lyrics));
-  }, [formData.lyrics]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,6 +37,12 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
       'G', 'Gm', 'G7', 'Gm7', 'Gmaj7', 'G/B', 'G/D'
     ];
 
+    // Lista de secciones
+    const sections = [
+      'Intro', 'Verso', 'Pre-Coro', 'Coro', 'Puente', 'Instrumental', 'Final',
+      'Outro', 'Interludio', 'Solo'
+    ];
+
     // Dividir el texto en líneas
     const lines = text.split('\n');
     
@@ -64,7 +51,15 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
       // Si la línea está vacía, devolverla tal cual
       if (!line.trim()) return line;
 
-      // Verificar si la línea contiene solo acordes (sin texto)
+      // Verificar si es una línea de sección
+      const sectionMatch = line.trim().match(/^\[(.*?)\]$/);
+      if (sectionMatch && sections.some(section => 
+        sectionMatch[1].toLowerCase().includes(section.toLowerCase())
+      )) {
+        return `<span class="section-tag">[${sectionMatch[1]}]</span>`;
+      }
+
+      // Verificar si la línea contiene solo acordes
       const words = line.trim().split(/\s+/);
       const isChordOnlyLine = words.every(word => {
         const trimmedWord = word.trim();
@@ -76,25 +71,21 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
 
       if (isChordOnlyLine && words.length > 0) {
         // Si es una línea solo de acordes, formatear cada palabra como acorde
-        return words.map(word => `[${word}]`).join(' ');
+        return words.map(word => `<span class="chord-tag">[${word}]</span>`).join(' ');
       }
 
       // Para líneas con texto, solo formatear palabras que son definitivamente acordes
-      // (están solas o al principio de la línea)
       const formattedWords = words.map((word, index) => {
         const trimmedWord = word.trim();
         const isFirstWord = index === 0;
         const isPreviousWordEmpty = index > 0 && !words[index - 1].trim();
         const isAlone = isFirstWord || isPreviousWordEmpty;
 
-        // Solo formatear como acorde si:
-        // 1. Es una palabra sola al principio de la línea o después de espacios
-        // 2. Coincide exactamente con un acorde conocido
         if (isAlone && commonChords.some(chord => 
           trimmedWord.toUpperCase() === chord.toUpperCase() ||
           trimmedWord.toUpperCase().startsWith(chord.toUpperCase() + '/')
         )) {
-          return `[${word}]`;
+          return `<span class="chord-tag">[${word}]</span>`;
         }
         return word;
       });
@@ -196,8 +187,8 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     const selection = text.substring(start, end);
     const after = text.substring(end);
     
-    // Crear el tag de sección
-    const sectionTag = `[${sectionType}]\n`;
+    // Crear el tag de sección con la clase
+    const sectionTag = `<span class="section-tag">[${sectionType}]</span>\n`;
     
     // Insertar el tag y mantener el texto seleccionado
     const newText = before + sectionTag + selection + after;
@@ -399,25 +390,12 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                   </button>
                 </div>
               </div>
-              <div className="relative">
-                <textarea
-                  id="lyrics"
-                  name="lyrics"
-                  value={formData.lyrics || ''}
-                  onChange={handleChange}
-                  onPaste={handlePaste}
-                  rows="6"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-transparent placeholder-transparent focus:outline-none focus:border-[#FBAE00] font-mono text-sm"
-                  placeholder="[Am] Letra de la canción..."
-                  style={{ caretColor: 'white' }}
-                />
-                <div 
-                  className="absolute top-0 left-0 w-full h-full pointer-events-none px-3 py-2 font-mono text-sm whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ 
-                    __html: formatDisplayText(formData.lyrics) || '<span class="text-gray-500">[Am] Letra de la canción...</span>'
-                  }}
-                />
-              </div>
+              <LyricsDisplay
+                content={formData.lyrics || ''}
+                onChange={handleChange}
+                placeholder="[Am] Letra de la canción..."
+                className="min-h-[150px] w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00]"
+              />
             </div>
           </div>
 
