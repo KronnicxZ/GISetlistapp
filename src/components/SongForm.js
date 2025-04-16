@@ -78,6 +78,32 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     }
   };
 
+  const insertSectionTag = (sectionType) => {
+    const textarea = document.getElementById('lyrics');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = formData.lyrics;
+    const before = text.substring(0, start);
+    const selection = text.substring(start, end);
+    const after = text.substring(end);
+    
+    // Crear el tag de sección
+    const sectionTag = `[${sectionType}]\n`;
+    
+    // Insertar el tag y mantener el texto seleccionado
+    const newText = before + sectionTag + selection + after;
+    
+    // Actualizar el estado
+    setFormData(prev => ({ ...prev, lyrics: newText }));
+    
+    // Restaurar el foco y la posición del cursor
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + sectionTag.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos + selection.length);
+    }, 0);
+  };
+
   return (
     <div 
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
@@ -210,10 +236,64 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Letra con acordes
-              </label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-medium text-gray-400">
+                  Letra con acordes
+                </label>
+                <div className="flex flex-wrap gap-1">
+                  <button 
+                    type="button" 
+                    onClick={() => insertSectionTag('Intro')}
+                    className="px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700"
+                  >
+                    Intro
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => insertSectionTag('Verso')}
+                    className="px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700"
+                  >
+                    Verso
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => insertSectionTag('Pre-Coro')}
+                    className="px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700"
+                  >
+                    Pre-Coro
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => insertSectionTag('Coro')}
+                    className="px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700"
+                  >
+                    Coro
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => insertSectionTag('Puente')}
+                    className="px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700"
+                  >
+                    Puente
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => insertSectionTag('Instrumental')}
+                    className="px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700"
+                  >
+                    Instrumental
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => insertSectionTag('Final')}
+                    className="px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700"
+                  >
+                    Final
+                  </button>
+                </div>
+              </div>
               <textarea
+                id="lyrics"
                 name="lyrics"
                 value={formData.lyrics || ''}
                 onChange={handleChange}
