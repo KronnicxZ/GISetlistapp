@@ -144,8 +144,30 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
               <div className="bg-[#1a1f2e] h-full rounded-lg">
                 <div className="p-4">
                   <h3 className="text-gray-400 text-sm font-medium mb-4">Letra con acordes</h3>
-                  <div className="text-white font-mono text-sm whitespace-pre-wrap">
-                    {transposedLyrics || '-'}
+                  <div className="text-white font-mono text-sm whitespace-pre-wrap lyrics-content">
+                    {transposedLyrics.split('\n').map((line, index) => {
+                      // Detectar si es una etiqueta de sección
+                      if (line.match(/^\[(Intro|Verso|Coro|Pre-Coro|Puente|Instrumental|Final)\]/i)) {
+                        return (
+                          <div key={index} className="text-[#FBAE00] font-semibold mt-4 mb-2">
+                            {line}
+                          </div>
+                        );
+                      }
+                      
+                      // Resaltar acordes en el texto
+                      const parts = line.split(/(\[[^\]]+\])/g);
+                      return (
+                        <div key={index} className="mb-1">
+                          {parts.map((part, partIndex) => {
+                            if (part.startsWith('[') && part.endsWith(']')) {
+                              return <span key={partIndex} className="text-[#4a9eff]">{part}</span>;
+                            }
+                            return <span key={partIndex}>{part}</span>;
+                          })}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

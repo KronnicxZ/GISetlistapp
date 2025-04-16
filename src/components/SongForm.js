@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { extractYoutubeVideoId } from '../utils/youtube';
 
 const SongForm = ({ initialData, onSubmit, onCancel }) => {
@@ -13,6 +13,25 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
   });
   const [isFetching, setIsFetching] = useState(false);
   const [fetchError, setFetchError] = useState(null);
+  const [displayText, setDisplayText] = useState('');
+
+  useEffect(() => {
+    // Formatear el texto para mostrar
+    const formatDisplayText = (text) => {
+      if (!text) return '';
+      return text.split('\n').map(line => {
+        // Detectar si es una etiqueta de sección
+        if (line.match(/^\[(Intro|Verso|Coro|Pre-Coro|Puente|Instrumental|Final)\]/i)) {
+          return `<div class="text-[#FBAE00] font-semibold mt-4 mb-2">${line}</div>`;
+        }
+        
+        // Resaltar acordes
+        return line.replace(/(\[[^\]]+\])/g, '<span class="text-[#4a9eff]">$1</span>');
+      }).join('\n');
+    };
+
+    setDisplayText(formatDisplayText(formData.lyrics));
+  }, [formData.lyrics]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -379,16 +398,22 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                   </button>
                 </div>
               </div>
-              <textarea
-                id="lyrics"
-                name="lyrics"
-                value={formData.lyrics || ''}
-                onChange={handleChange}
-                onPaste={handlePaste}
-                rows="6"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text"
-                placeholder="[Am] Letra de la canción..."
-              />
+              <div className="relative">
+                <textarea
+                  id="lyrics"
+                  name="lyrics"
+                  value={formData.lyrics || ''}
+                  onChange={handleChange}
+                  onPaste={handlePaste}
+                  rows="6"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text opacity-0 absolute inset-0 z-10"
+                  placeholder="[Am] Letra de la canción..."
+                />
+                <div 
+                  className="w-full h-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white font-mono text-sm whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: displayText || '<span class="text-gray-500">[Am] Letra de la canción...</span>' }}
+                />
+              </div>
             </div>
           </div>
 
