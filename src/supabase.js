@@ -15,11 +15,24 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 // Funciones auxiliares para interactuar con Supabase
 export const auth = {
   signIn: async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    return { data, error }
+    try {
+      console.log('Intentando iniciar sesión con:', { email });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error('Error al iniciar sesión:', error);
+      } else {
+        console.log('Inicio de sesión exitoso:', data);
+      }
+      
+      return { data, error };
+    } catch (err) {
+      console.error('Error inesperado al iniciar sesión:', err);
+      return { data: null, error: err };
+    }
   },
 
   signUp: async (email, password) => {
