@@ -25,7 +25,17 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const cleanText = (text) => {
+    // Eliminar todos los estilos HTML y mantener solo el texto plano
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = text;
+    return tempDiv.textContent || tempDiv.innerText || '';
+  };
+
   const formatPastedLyrics = (text) => {
+    // Primero limpiar cualquier formato HTML
+    const cleanedText = cleanText(text);
+
     // Lista de acordes comunes
     const commonChords = [
       'A', 'Am', 'A7', 'Am7', 'Amaj7', 'A/C#', 'A/E', 'A/G#',
@@ -37,55 +47,24 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
       'G', 'Gm', 'G7', 'Gm7', 'Gmaj7', 'G/B', 'G/D'
     ];
 
-    // Lista de secciones
-    const sections = [
-      'Intro', 'Verso', 'Pre-Coro', 'Coro', 'Puente', 'Instrumental', 'Final',
-      'Outro', 'Interludio', 'Solo'
-    ];
-
     // Dividir el texto en líneas
-    const lines = text.split('\n');
+    const lines = cleanedText.split('\n');
     
     // Procesar cada línea
     const formattedLines = lines.map(line => {
       // Si la línea está vacía, devolverla tal cual
       if (!line.trim()) return line;
 
-      // Verificar si es una línea de sección
-      const sectionMatch = line.trim().match(/^\[(.*?)\]$/);
-      if (sectionMatch && sections.some(section => 
-        sectionMatch[1].toLowerCase().includes(section.toLowerCase())
-      )) {
-        return `<span class="section-tag">[${sectionMatch[1]}]</span>`;
-      }
-
-      // Verificar si la línea contiene solo acordes
+      // Buscar acordes en la línea
       const words = line.trim().split(/\s+/);
-      const isChordOnlyLine = words.every(word => {
+      const formattedWords = words.map(word => {
         const trimmedWord = word.trim();
-        return commonChords.some(chord => 
-          trimmedWord.toUpperCase() === chord.toUpperCase() ||
-          trimmedWord.toUpperCase().startsWith(chord.toUpperCase() + '/')
-        );
-      });
-
-      if (isChordOnlyLine && words.length > 0) {
-        // Si es una línea solo de acordes, formatear cada palabra como acorde
-        return words.map(word => `<span class="chord-tag">[${word}]</span>`).join(' ');
-      }
-
-      // Para líneas con texto, solo formatear palabras que son definitivamente acordes
-      const formattedWords = words.map((word, index) => {
-        const trimmedWord = word.trim();
-        const isFirstWord = index === 0;
-        const isPreviousWordEmpty = index > 0 && !words[index - 1].trim();
-        const isAlone = isFirstWord || isPreviousWordEmpty;
-
-        if (isAlone && commonChords.some(chord => 
+        // Verificar si la palabra es un acorde
+        if (commonChords.some(chord => 
           trimmedWord.toUpperCase() === chord.toUpperCase() ||
           trimmedWord.toUpperCase().startsWith(chord.toUpperCase() + '/')
         )) {
-          return `<span class="chord-tag">[${word}]</span>`;
+          return `[${word}]`;
         }
         return word;
       });
@@ -187,8 +166,8 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     const selection = text.substring(start, end);
     const after = text.substring(end);
     
-    // Crear el tag de sección con la clase
-    const sectionTag = `<span class="section-tag">[${sectionType}]</span>\n`;
+    // Crear el tag de sección
+    const sectionTag = `[${sectionType}]\n`;
     
     // Insertar el tag y mantener el texto seleccionado
     const newText = before + sectionTag + selection + after;
@@ -200,7 +179,7 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     setTimeout(() => {
       textarea.focus();
       const newCursorPos = start + sectionTag.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos + selection.length);
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
 
@@ -390,11 +369,15 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                   </button>
                 </div>
               </div>
-              <LyricsDisplay
-                content={formData.lyrics || ''}
+              <textarea
+                id="lyrics"
+                name="lyrics"
+                value={formData.lyrics || ''}
                 onChange={handleChange}
+                onPaste={handlePaste}
+                rows="6"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text"
                 placeholder="[Am] Letra de la canción..."
-                className="min-h-[150px] w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00]"
               />
             </div>
           </div>
