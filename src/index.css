@@ -22,14 +22,16 @@ body {
   tab-size: 4;
 }
 
-.lyrics-text .chord {
-  color: #4a9eff;
-  font-weight: 500;
+.lyrics-text .chord,
+.chord {
+  color: #4a9eff !important;
+  font-weight: 500 !important;
 }
 
-.lyrics-text .section {
-  color: #FBAE00;
-  font-weight: 600;
+.lyrics-text .section,
+.section {
+  color: #FBAE00 !important;
+  font-weight: 600 !important;
   display: inline-block;
   margin-top: 0.5em;
 }
