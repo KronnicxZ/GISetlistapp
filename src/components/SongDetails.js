@@ -45,10 +45,10 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
     >
       <div className="bg-[#0f1420] w-full max-w-6xl max-h-[90vh] rounded-lg flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-4 flex justify-between items-center border-b border-gray-800">
-          <div className="flex-1">
-            <h1 className="text-xl text-white font-medium truncate pr-4">{song.title}</h1>
-            <p className="text-gray-400 text-sm truncate">{song.artist}</p>
+        <div className="p-4 flex justify-between items-start border-b border-gray-800">
+          <div className="flex-1 min-w-0 pr-4">
+            <h1 className="text-xl text-white font-medium break-words">{song.title}</h1>
+            <p className="text-gray-400 text-sm mt-1">{song.artist}</p>
           </div>
           <button 
             onClick={onClose}
