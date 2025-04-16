@@ -51,19 +51,4 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
-}
-
-/* Estilos para los acordes */
-.lyrics-text [class^="chord-"] {
-  color: #FBAE00;
-  font-weight: 600;
-}
-
-/* Estilos para las etiquetas de sección */
-.lyrics-text [class^="section-"] {
-  color: #4CAF50;
-  font-weight: 600;
-  display: block;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
 } 

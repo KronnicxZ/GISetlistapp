@@ -98,13 +98,11 @@ const PlayerModal = ({ song, onClose }) => {
               </div>
             </div>
             
-            <div className="bg-gray-800 rounded-lg flex flex-col h-[60vh] lg:h-[70vh]">
-              <h4 className="font-medium text-white sticky top-0 bg-gray-800 p-4 border-b border-gray-700">
-                Letra con acordes
-              </h4>
-              <div className="p-4 overflow-y-auto flex-1">
+            <div className="bg-[#1a1f2e] h-full rounded-lg">
+              <div className="p-4">
+                <h3 className="text-gray-400 text-sm font-medium mb-4">Letra con acordes</h3>
                 <pre className="whitespace-pre-wrap lyrics-text text-gray-300">
-                  {transposedLyrics}
+                  {song.lyrics || '-'}
                 </pre>
               </div>
             </div>
