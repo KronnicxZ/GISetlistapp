@@ -406,12 +406,15 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
                   onChange={handleChange}
                   onPaste={handlePaste}
                   rows="6"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text opacity-0 absolute inset-0 z-10"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FBAE00] lyrics-text font-mono text-sm"
                   placeholder="[Am] Letra de la canción..."
+                  style={{ caretColor: 'white' }}
                 />
                 <div 
-                  className="w-full h-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white font-mono text-sm whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: displayText || '<span class="text-gray-500">[Am] Letra de la canción...</span>' }}
+                  className="absolute top-0 left-0 w-full h-full pointer-events-none px-3 py-2"
+                  dangerouslySetInnerHTML={{ 
+                    __html: displayText || '<span class="text-gray-500">[Am] Letra de la canción...</span>' 
+                  }}
                 />
               </div>
             </div>
