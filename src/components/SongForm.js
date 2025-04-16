@@ -44,7 +44,18 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
       'D', 'Dm', 'D7', 'Dm7', 'Dmaj7', 'D/F#', 'D/A',
       'E', 'Em', 'E7', 'Em7', 'Emaj7', 'E/G#', 'E/B',
       'F', 'Fm', 'F7', 'Fm7', 'Fmaj7', 'F/A', 'F/C',
-      'G', 'Gm', 'G7', 'Gm7', 'Gmaj7', 'G/B', 'G/D'
+      'G', 'Gm', 'G7', 'Gm7', 'Gmaj7', 'G/B', 'G/D',
+      // Agregar variaciones con sostenidos y bemoles
+      'A#', 'A#m', 'A#7', 'A#m7', 'A#maj7',
+      'Bb', 'Bbm', 'Bb7', 'Bbm7', 'Bbmaj7',
+      'C#', 'C#m', 'C#7', 'C#m7', 'C#maj7',
+      'Db', 'Dbm', 'Db7', 'Dbm7', 'Dbmaj7',
+      'D#', 'D#m', 'D#7', 'D#m7', 'D#maj7',
+      'Eb', 'Ebm', 'Eb7', 'Ebm7', 'Ebmaj7',
+      'F#', 'F#m', 'F#7', 'F#m7', 'F#maj7',
+      'Gb', 'Gbm', 'Gb7', 'Gbm7', 'Gbmaj7',
+      'G#', 'G#m', 'G#7', 'G#m7', 'G#maj7',
+      'Ab', 'Abm', 'Ab7', 'Abm7', 'Abmaj7'
     ];
 
     // Dividir el texto en líneas
@@ -57,14 +68,19 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
 
       // Buscar acordes en la línea
       const words = line.trim().split(/\s+/);
-      const formattedWords = words.map(word => {
+      const formattedWords = words.map((word, index) => {
         const trimmedWord = word.trim();
         // Verificar si la palabra es un acorde
+        // Solo considerar como acorde si:
+        // 1. La palabra coincide exactamente con un acorde conocido
+        // 2. Está al inicio de la línea o después de un espacio
+        // 3. No es parte de una palabra más larga
         if (commonChords.some(chord => 
           trimmedWord.toUpperCase() === chord.toUpperCase() ||
-          trimmedWord.toUpperCase().startsWith(chord.toUpperCase() + '/')
-        )) {
-          return `[${word}]`;
+          (trimmedWord.includes('/') && 
+           commonChords.some(c => trimmedWord.toUpperCase().startsWith(c.toUpperCase() + '/')))
+        ) && (index === 0 || words[index - 1] === '')) {
+          return `<span data-chord>[${word}]</span>`;
         }
         return word;
       });
@@ -166,8 +182,8 @@ const SongForm = ({ initialData, onSubmit, onCancel }) => {
     const selection = text.substring(start, end);
     const after = text.substring(end);
     
-    // Crear el tag de sección
-    const sectionTag = `[${sectionType}]\n`;
+    // Crear el tag de sección con el atributo data-chord
+    const sectionTag = `<span data-chord>[${sectionType}]</span>\n`;
     
     // Insertar el tag y mantener el texto seleccionado
     const newText = before + sectionTag + selection + after;
