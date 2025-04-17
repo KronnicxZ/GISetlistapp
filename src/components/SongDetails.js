@@ -42,17 +42,18 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
 
   const formatLyrics = (text) => {
     return text.split('\n').map((line, index) => {
-      if (line.trim().startsWith('[') && line.trim().endsWith(']')) {
-        return <div key={index} className="section-tag">{line}</div>;
+      // Detectar líneas de sección
+      if (line.trim().startsWith('[') && line.trim().endsWith(']') && 
+          line.trim().match(/^\[(INTRO|VERSO|PRE-?CORO|CORO|PUENTE|INSTRUMENTAL|FINAL)\]$/i)) {
+        return <div key={index} className="section">{line}</div>;
       }
       
-      // Detectar líneas que solo contienen acordes
-      const isChordLine = line.trim() && !line.trim().match(/[a-z]/i);
-      if (isChordLine) {
-        return <div key={index} className="chord-line">{line}</div>;
-      }
+      // Procesar líneas con acordes
+      const processedLine = line.replace(/\[([^\]]+)\]/g, (match, chord) => {
+        return `<span class="chord">[${chord}]</span>`;
+      });
       
-      return <div key={index}>{line}</div>;
+      return <div key={index} dangerouslySetInnerHTML={{ __html: processedLine }} />;
     });
   };
 
