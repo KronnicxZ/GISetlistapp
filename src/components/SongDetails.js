@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import Metronome from './Metronome';
 import { transposeText, NOTES } from '../utils/chordTransposer';
 import { useAuth } from '../context/AuthContext';
@@ -34,144 +36,83 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
     }
   };
 
-  return (
-    <div 
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <div className="bg-[#0f1420] w-full max-w-6xl max-h-[90vh] rounded-lg flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="p-4 flex justify-between items-start border-b border-gray-800">
-          <div className="flex-1 min-w-0 pr-4">
-            <h1 className="text-xl text-white font-medium break-words">{song.title}</h1>
-            <p className="text-gray-400 text-sm mt-1">{song.artist}</p>
-          </div>
-          <button 
-            onClick={onClose}
-            className="text-gray-400 hover:text-white p-2 flex-shrink-0"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-          </button>
+  const formatLyrics = (text) => {
+    return text.split('\n').map((line, index) => {
+      // Detectar si es una etiqueta de sección
+      if (line.trim().match(/^\[(INTRO|VERSO|PRE-?CORO|CORO|PUENTE|INSTRUMENTAL|FINAL)\]$/i)) {
+        return <div key={index} className="section">{line}</div>;
+      }
+      
+      // Resaltar acordes en el texto
+      const parts = line.split(/(\[[^\]]+\])/g);
+      return (
+        <div key={index} className="mb-1">
+          {parts.map((part, partIndex) => {
+            if (part.startsWith('[') && part.endsWith(']')) {
+              return <span key={partIndex} className="chord">{part}</span>;
+            }
+            return <span key={partIndex}>{part}</span>;
+          })}
         </div>
+      );
+    });
+  };
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto">
-          <div className="flex flex-col md:flex-row h-full">
-            {/* Left Column */}
-            <div className="md:w-1/2 p-4 space-y-4">
-              {/* Video */}
-              {song.youtubeUrl && (
-                <div className="relative pb-[56.25%] h-0 bg-[#1a1f2e] rounded-lg overflow-hidden">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${song.youtubeUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1]}`}
-                    title={song.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute top-0 left-0 w-full h-full"
-                  ></iframe>
-                </div>
-              )}
+  if (!song) return null;
 
-              {/* Controls Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* BPM */}
-                <div className="bg-[#1a1f2e] p-4 rounded-lg">
-                  <p className="text-gray-400 text-sm font-medium mb-1">BPM</p>
-                  <p className="text-[#FBAE00] text-2xl font-bold tabular-nums">{song.bpm || '-'}</p>
-                </div>
+  return (
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center p-4 z-50">
+      <div className="bg-gray-800 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-xl">
+        <div className="p-4 border-b border-gray-700">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-semibold text-white">{song.title}</h2>
+              <p className="text-gray-400">{song.artist}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-white"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
 
-                {/* Key */}
-                <div className="bg-[#1a1f2e] p-4 rounded-lg">
-                  <p className="text-gray-400 text-sm font-medium mb-1">Tonalidad</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#FBAE00] text-2xl font-bold">{newKey || '-'}</span>
-                    {song.key && (
-                      <div className="flex items-center gap-3">
-                        <button 
-                          onClick={() => handleTranspose(-1)}
-                          className="text-gray-400 hover:text-white text-lg w-6 h-6 flex items-center justify-center"
-                        >
-                          −
-                        </button>
-                        <button 
-                          onClick={() => handleTranspose(0)}
-                          className="text-gray-400 hover:text-white px-2 text-sm"
-                        >
-                          Reset
-                        </button>
-                        <button 
-                          onClick={() => handleTranspose(1)}
-                          className="text-gray-400 hover:text-white text-lg w-6 h-6 flex items-center justify-center"
-                        >
-                          +
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
+          <div className="flex items-center gap-4 mb-4">
+            <p className="text-gray-300">BPM: {song.bpm || '-'}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-gray-300">Tono: {song.key || '-'}</p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleTranspose(-1)}
+                  className="p-1 text-gray-400 hover:text-white"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                <span className="text-gray-300 w-6 text-center">{semitones}</span>
+                <button
+                  onClick={() => handleTranspose(1)}
+                  className="p-1 text-gray-400 hover:text-white"
+                >
+                  <FontAwesomeIcon icon={faChevronRight} />
+                </button>
               </div>
-
-              {/* Duplicate Button */}
               {isAdmin && semitones !== 0 && (
                 <button
                   onClick={handleDuplicateWithNewKey}
-                  className="w-full bg-[#1a1f2e] hover:bg-[#242937] text-[#FBAE00] p-4 rounded-lg flex items-center justify-center space-x-2"
+                  className="ml-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
-                  </svg>
-                  <span>Duplicar en {newKey}</span>
+                  Duplicar en nuevo tono
                 </button>
               )}
-
-              {/* Metronome */}
-              {song.bpm && (
-                <div className="bg-[#1a1f2e] p-4 rounded-lg">
-                  <h3 className="text-gray-400 text-sm font-medium mb-4">Metrónomo</h3>
-                  <Metronome initialBpm={parseInt(song.bpm, 10)} />
-                </div>
-              )}
             </div>
+          </div>
+        </div>
 
-            {/* Right Column - Lyrics */}
-            <div className="md:w-1/2 p-4">
-              <div className="bg-[#1a1f2e] h-full rounded-lg">
-                <div className="p-4">
-                  <h3 className="text-gray-400 text-sm font-medium mb-4">Letra con acordes</h3>
-                  <div className="text-white font-mono text-sm whitespace-pre-wrap lyrics-content">
-                    {transposedLyrics.split('\n').map((line, index) => {
-                      // Detectar si es una etiqueta de sección
-                      if (line.match(/^\[(Intro|Verso|Coro|Pre-Coro|Puente|Instrumental|Final)\]/i)) {
-                        return (
-                          <div key={index} className="text-[#FBAE00] font-semibold mt-4 mb-2">
-                            {line}
-                          </div>
-                        );
-                      }
-                      
-                      // Resaltar acordes en el texto
-                      const parts = line.split(/(\[[^\]]+\])/g);
-                      return (
-                        <div key={index} className="mb-1">
-                          {parts.map((part, partIndex) => {
-                            if (part.startsWith('[') && part.endsWith(']')) {
-                              return <span key={partIndex} className="text-[#4a9eff]">{part}</span>;
-                            }
-                            return <span key={partIndex}>{part}</span>;
-                          })}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="lyrics-container overflow-y-auto max-h-[60vh] p-4 bg-gray-900 rounded">
+          <div className="lyrics-text">
+            {formatLyrics(transposedLyrics || '-')}
           </div>
         </div>
       </div>

@@ -17,7 +17,26 @@ body {
 
 /* Mantener la fuente monoespaciada solo para los acordes */
 .lyrics-text {
-  font-family: monospace;
+  white-space: pre-wrap;
+  font-family: 'Roboto Mono', monospace;
+  line-height: 1.6;
+  tab-size: 4;
+}
+
+.lyrics-text .chord,
+.chord {
+  color: #4a9eff !important;
+  font-weight: 500 !important;
+  display: inline-block;
+}
+
+.lyrics-text .section,
+.section {
+  color: #FBAE00 !important;
+  font-weight: 600 !important;
+  display: inline-block;
+  margin-top: 0.75em;
+  margin-bottom: 0.25em;
 }
 
 /* Estilos para scrollbars personalizados */
@@ -27,24 +46,31 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: #1a1f2e;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: #2d3548;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: #3d4761;
 }
 
 /* Estilos para inputs type number */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  opacity: 1;
+  background: #1a1f2e;
+  border-left: 1px solid #2d3548;
+  height: 100%;
   margin: 0;
+  padding: 0 4px;
+  position: relative;
+  right: 4px;
+  border-radius: 0 4px 4px 0;
 }
 
 input[type="number"] {
