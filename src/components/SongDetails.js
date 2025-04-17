@@ -142,17 +142,22 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
                   </div>
                 </div>
 
-                {/* Duplicate Button */}
+                {/* Duplicate Button - Solo visible para administradores */}
                 {isAdmin && semitones !== 0 && (
-                  <button
-                    onClick={handleDuplicateWithNewKey}
-                    className="w-full bg-[#1a1f2e] hover:bg-[#242937] text-[#FBAE00] p-4 rounded-lg flex items-center justify-center space-x-2"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
-                    </svg>
-                    <span>Duplicar en {newKey}</span>
-                  </button>
+                  <div className="bg-[#1a1f2e] p-4 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <p className="text-gray-400 text-sm font-medium">Nueva tonalidad: <span className="text-[#FBAE00] font-bold">{newKey}</span></p>
+                      <button
+                        onClick={handleDuplicateWithNewKey}
+                        className="bg-[#242937] hover:bg-[#2d3444] text-[#FBAE00] px-4 py-2 rounded-lg flex items-center space-x-2"
+                      >
+                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                          <path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+                        </svg>
+                        <span>Duplicar canción</span>
+                      </button>
+                    </div>
+                  </div>
                 )}
 
                 {/* Metronome */}
