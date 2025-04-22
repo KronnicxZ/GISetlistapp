@@ -20,20 +20,22 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
         password: password,
       });
 
+      console.log('Respuesta de autenticación:', { data, error: signInError });
+
       if (signInError) {
         console.error('Error detallado de inicio de sesión:', signInError);
         setError('Contraseña incorrecta');
         return;
       }
 
-      if (!data?.user) {
+      if (!data?.session?.user) {
         console.error('No se recibieron datos del usuario');
         setError('Error al obtener los datos del usuario');
         return;
       }
 
       console.log('Inicio de sesión exitoso:', data);
-      onLogin(data);
+      onLogin({ data: { user: data.session.user } });
       onClose();
     } catch (err) {
       console.error('Error completo del proceso:', err);
