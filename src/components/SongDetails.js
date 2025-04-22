@@ -34,6 +34,31 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
     }
   };
 
+  const renderLyricsWithChords = (text) => {
+    if (!text) return '-';
+    
+    // Dividir el texto en líneas
+    return text.split('\n').map((line, i) => {
+      // Buscar acordes entre corchetes
+      const parts = line.split(/(\[[^\]]+\])/g);
+      return (
+        <div key={i}>
+          {parts.map((part, j) => {
+            if (part.startsWith('[') && part.endsWith(']')) {
+              // Es un acorde, aplicar estilo especial
+              return (
+                <span key={j} className="text-[#FBAE00] font-bold">
+                  {part}
+                </span>
+              );
+            }
+            return <span key={j}>{part}</span>;
+          })}
+        </div>
+      );
+    });
+  };
+
   return (
     <div 
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
@@ -145,7 +170,7 @@ const SongDetails = ({ song, onClose, onDuplicateSong }) => {
                 <div className="p-4">
                   <h3 className="text-gray-400 text-sm font-medium mb-4">Letra con acordes</h3>
                   <div className="text-white font-mono text-sm whitespace-pre-wrap">
-                    {transposedLyrics || '-'}
+                    {renderLyricsWithChords(transposedLyrics)}
                   </div>
                 </div>
               </div>
