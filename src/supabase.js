@@ -11,7 +11,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Error: Faltan las variables de entorno de Supabase')
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Funciones auxiliares para interactuar con Supabase
 export const auth = {
