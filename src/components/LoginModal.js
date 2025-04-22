@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { auth } from '../supabase';
+import { supabase } from '../supabase';
 
 const ADMIN_EMAIL = 'kronnicxz@gmail.com';
 
@@ -15,7 +15,10 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
 
     try {
       console.log('Iniciando proceso de login con:', { email: ADMIN_EMAIL });
-      const { data, error: signInError } = await auth.signIn(ADMIN_EMAIL, password);
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: ADMIN_EMAIL,
+        password: password,
+      });
 
       if (signInError) {
         console.error('Error detallado de inicio de sesión:', signInError);
