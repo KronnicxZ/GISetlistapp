@@ -170,17 +170,27 @@ function App() {
   const handleSaveSetlist = async (setlistData) => {
     try {
       let response;
+      
+      // Formatear los datos del setlist
+      const setlistToSave = {
+        name: setlistData.name,
+        date: setlistData.date,
+        description: setlistData.description
+      };
+
       if (editingSetlist) {
-        response = await setlistsApi.update(editingSetlist.id, setlistData);
+        // Actualizar el setlist existente
+        response = await setlistsApi.update(editingSetlist.id, setlistToSave);
+        
+        if (response.error) throw response.error;
+        
+        // Actualizar las canciones del setlist
+        const { error: songsError } = await setlistsApi.addSongs(editingSetlist.id, setlistData.songs || []);
+        if (songsError) throw songsError;
       } else {
+        // Crear nuevo setlist
         response = await setlistsApi.create(setlistData);
-      }
-
-      if (response.error) throw response.error;
-
-      if (setlistData.songs?.length > 0) {
-        const { error } = await setlistsApi.addSongs(response.data[0].id, setlistData.songs);
-        if (error) throw error;
+        if (response.error) throw response.error;
       }
 
       await loadData();
@@ -188,6 +198,7 @@ function App() {
       setEditingSetlist(null);
     } catch (error) {
       console.error('Error al guardar setlist:', error);
+      alert('Error al guardar el setlist');
     }
   };
 
