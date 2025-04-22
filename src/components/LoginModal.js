@@ -14,27 +14,27 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
     setError(null);
 
     try {
-      console.log('Iniciando proceso de login...');
+      console.log('Iniciando proceso de login con:', { email: ADMIN_EMAIL });
       const { data, error: signInError } = await auth.signIn(ADMIN_EMAIL, password);
 
       if (signInError) {
         console.error('Error detallado de inicio de sesión:', signInError);
-        setError(signInError.message || 'Error al iniciar sesión');
+        setError('Contraseña incorrecta');
         return;
       }
 
-      if (!data || !data.user) {
+      if (!data?.user) {
         console.error('No se recibieron datos del usuario');
-        setError('No se pudo obtener la información del usuario');
+        setError('Error al obtener los datos del usuario');
         return;
       }
 
-      console.log('Datos del usuario recibidos:', data);
+      console.log('Inicio de sesión exitoso:', data);
       onLogin(data);
       onClose();
     } catch (err) {
       console.error('Error completo del proceso:', err);
-      setError(err.message || 'Error inesperado al iniciar sesión');
+      setError('Error al intentar iniciar sesión');
     } finally {
       setIsLoading(false);
     }
@@ -50,6 +50,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white"
+            aria-label="Cerrar"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
